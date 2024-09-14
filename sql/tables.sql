@@ -22,11 +22,32 @@ CREATE TABLE IF NOT EXISTS user (
     FOREIGN KEY (updated_by) REFERENCES user(userID)    -- Foreign key linking to the user who last updated this record
 );
 
-CREATE TABLE IF NOT EXISTS user_roles (
+CREATE TABLE IF NOT EXISTS roles (
     role_id INT AUTO_INCREMENT PRIMARY KEY,      -- Unique identifier for each role
-    role_name VARCHAR(50) UNIQUE NOT NULL        -- Name of the role (e.g., 'Client', 'Fund Manager'), must be unique and cannot be null
+    role_name VARCHAR(50) UNIQUE NOT NULL,        -- Name of the role (e.g., 'Client', 'Fund Manager'), must be unique and cannot be null
+    description_info VARCHAR(255)                -- Description of the role
 );
 
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id INT ,                                -- Unique identifier for each role
+    role_id INT,                                 -- ID of the role assigned to the user
+    PRIMARY KEY (user_id, role_id),              -- Composite primary key to ensure uniqueness
+    FOREIGN KEY (user_id) REFERENCES user(userID),  -- Foreign key linking to the user table
+    FOREIGN KEY (role_id) REFERENCES roles(role_id)  -- Foreign key linking to the roles table
+);
+
+CREATE TABLE IF NOT EXISTS permission (
+    permission_id INT AUTO_INCREMENT PRIMARY KEY,
+    permission_name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT
+);
+CREATE TABLE IF NOT EXISTS role_permission (
+    role_id INT,
+    permission_id INT,
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES role(role_id),
+    FOREIGN KEY (permission_id) REFERENCES permission(permission_id)
+);
 
 CREATE TABLE IF NOT EXISTS nasdaq_listed_equities (
     id INT AUTO_INCREMENT PRIMARY KEY,                  -- Unique identifier for each stock entry
@@ -89,13 +110,18 @@ CREATE TABLE IF NOT EXISTS fund_portfolio (
 CREATE TABLE IF NOT EXISTS client_orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,            -- Unique identifier for each client order
     client_id INT,                                      -- Foreign key linking to the client in the user table
-    stock_id INT,                                       -- Foreign key linking to the stock/equity table
-    quantity INT,                                       -- Quantity of stock in the order
-    price DECIMAL(10, 4),                               -- Price at which the order was executed
-    order_type ENUM('BUY', 'SELL') NOT NULL,            -- Indicates whether the order is a buy or sell
-    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- Timestamp when the order was placed
-    FOREIGN KEY (client_id) REFERENCES user(userID),    -- Foreign key constraint to link the client
-    FOREIGN KEY (stock_id) REFERENCES nasdaq_listed_equities(id) -- Foreign key constraint for stock reference
+    symbol VARCHAR(10),                                -- Symbol of the stock or equity
+    quantity INT,                                      -- Quantity of stock in the order
+    price DECIMAL(10, 2),                              -- Price at which the order was executed
+    order_type ENUM('BUY', 'SELL') NOT NULL,           -- Indicates whether the order is a buy or sell
+    order_date DATE,                                  -- Date when the order was placed
+    status ENUM('Pending', 'Completed', 'Cancelled') DEFAULT 'Pending', -- Status of the order
+    created_by INT,                                   -- ID of the user who created this order
+    updated_by INT,                                   -- ID of the user who last updated this order
+    FOREIGN KEY (client_id) REFERENCES user(userID),   -- Foreign key constraint to link the client
+    FOREIGN KEY (symbol) REFERENCES nasdaq_listed_equities(symbol),  -- Foreign key constraint for stock reference
+    FOREIGN KEY (created_by) REFERENCES user(userID),   -- Foreign key linking to the user who created the order
+    FOREIGN KEY (updated_by) REFERENCES user(userID)    -- Foreign key linking to the user who last updated the order
 );
 
 CREATE TABLE IF NOT EXISTS fund_orders (
@@ -106,21 +132,31 @@ CREATE TABLE IF NOT EXISTS fund_orders (
     price DECIMAL(10, 4),                               -- Price at which the order was executed
     order_type ENUM('BUY', 'SELL') NOT NULL,            -- Indicates whether the order is a buy or sell
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- Timestamp when the order was placed
+    status ENUM('Pending', 'Completed', 'Cancelled') NOT NULL, -- Status of the order
+    created_by INT,                                     -- ID of the user who created this record
+    updated_by INT,                                     -- ID of the user who last updated this record
     FOREIGN KEY (fund_id) REFERENCES fund_portfolio(portfolio_id),  -- Foreign key constraint to link the fund
-    FOREIGN KEY (stock_id) REFERENCES nasdaq_listed_equities(id) -- Foreign key constraint for stock reference
+    FOREIGN KEY (stock_id) REFERENCES nasdaq_listed_equities(id),   -- Foreign key constraint for stock reference
+    FOREIGN KEY (created_by) REFERENCES user(userID),    -- Foreign key constraint for the creator
+    FOREIGN KEY (updated_by) REFERENCES user(userID)     -- Foreign key constraint for the last updater
 );
+
 
 
 CREATE TABLE IF NOT EXISTS equity_price_history (
-    id INT AUTO_INCREMENT PRIMARY KEY,            -- Unique identifier for each record
-    stock_id INT,                                -- Foreign key to the stock symbol
-    price DECIMAL(10, 2),                        -- Closing price of the stock
-    volume BIGINT,                               -- Volume of shares traded
-    date DATE,                                   -- Date of the record
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Timestamp of when the record was created
-    FOREIGN KEY (stock_id) REFERENCES nasdaq_listed_equities(id),
-    UNIQUE(stock_id, date)                       -- Ensures there is only one price record per stock per date
+    id INT AUTO_INCREMENT PRIMARY KEY,                -- Unique identifier for each record
+    stock_id INT,                                    -- Foreign key to the stock symbol
+    price_date DATE,                                -- Date of the price record
+    open_price DECIMAL(10, 2),                       -- Opening price of the stock
+    close_price DECIMAL(10, 2),                      -- Closing price of the stock
+    high_price DECIMAL(10, 2),                       -- Highest price of the stock during the day
+    low_price DECIMAL(10, 2),                        -- Lowest price of the stock during the day
+    volume BIGINT,                                  -- Volume of shares traded
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of when the record was created
+    FOREIGN KEY (stock_id) REFERENCES nasdaq_listed_equities(id),  -- Foreign key reference to the stock
+    UNIQUE(stock_id, price_date)                     -- Ensures there is only one record per stock per date
 );
+
 
 CREATE TABLE IF NOT EXISTS fund_price_history (
     id INT AUTO_INCREMENT PRIMARY KEY,            -- Unique identifier for each record
