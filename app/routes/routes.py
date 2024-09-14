@@ -2,7 +2,7 @@ from app import app
 from app.models.models import User
 # just a template, we have to create it custom
 @app.route('/')
-def get_users():
+def index():
     return "status:connected"
 
 @app.route('/users')
