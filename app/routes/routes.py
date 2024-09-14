@@ -1,5 +1,5 @@
 from app import app
-from app.models import User
+from app.models.models import User
 # just a template, we have to create it custom
 @app.route('/users')
 def get_users():
