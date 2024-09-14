@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Candlestick Chart</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Live Candlestick Chart</h1>
+    <div id="chart" style="width: 100%; height: 600px;"></div>
+    <h2>Current Price: <span id="current-price">Loading...</span></h2>
+
+    <script>
+        function fetchChartData() {
+            $.getJSON('/data', function(data) {
+                try {
+                    // Check if data contains expected fields
+                    if (data && data.data && data.current_price) {
+                        // Update the chart with new data
+                        var plotData = JSON.parse(data.data);
+                        Plotly.react('chart', plotData.data, plotData.layout);
+
+                        // Update the current price
+                        var formattedPrice = parseFloat(data.current_price).toFixed(2);
+                        $('#current-price').text(formattedPrice);
+                    } else {
+                        console.error("Unexpected data format:", data);
+                    }
+                } catch (e) {
+                    console.error("Error processing data:", e);
+                }
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error("Failed to fetch data:", textStatus, errorThrown);
+            });
+        }
+
+        // Fetch and update the chart and current price every minute
+        setInterval(fetchChartData, 1000); // Update every 60 seconds
+
+        // Initial load
+        fetchChartData();
+    </script>
+</body>
+</html>
