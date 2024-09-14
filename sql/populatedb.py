@@ -10,6 +10,8 @@
 #     -- fund_portfolio
 #     -- client_orders
 #     -- fund_orders
+#     --role_permission
+#     -- permission
 #     -- equity_price_history
 #     -- fund_price_history
 #     -- watchlist
@@ -42,13 +44,16 @@ cur = conn.cursor()
 def execute_query(sql_query):
     try:
         cur.execute("SET FOREIGN_KEY_CHECKS=0;")
-        cur.execute(sql_insert_query)
-        cur.commit()
-        cur.execute("SET FOREIGN_KEY_CHECKS=1;")
+        conn.commit()
+        cur.execute(sql_query)
+        conn.commit()
+        print('Data inserted successfully')
     except Exception as e:
         print(e)
+        
     finally:
         cur.execute("SET FOREIGN_KEY_CHECKS=1;")
+        conn.commit()
 
 sql_insert_query = '''
 INSERT INTO roles (role_id, role_name, description_info) VALUES
