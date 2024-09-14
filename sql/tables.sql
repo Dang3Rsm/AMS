@@ -22,6 +22,12 @@ CREATE TABLE IF NOT EXISTS user (
     FOREIGN KEY (updated_by) REFERENCES user(userID)    -- Foreign key linking to the user who last updated this record
 );
 
+CREATE TABLE IF NOT EXISTS roles (
+    role_id INT AUTO_INCREMENT PRIMARY KEY,      -- Unique identifier for each role
+    role_name VARCHAR(50) UNIQUE NOT NULL,        -- Name of the role (e.g., 'Client', 'Fund Manager'), must be unique and cannot be null
+    description_info VARCHAR(255)                -- Description of the role
+);
+
 CREATE TABLE IF NOT EXISTS user_roles (
     user_id INT ,                                -- Unique identifier for each role
     role_id INT,                                 -- ID of the role assigned to the user
@@ -30,10 +36,17 @@ CREATE TABLE IF NOT EXISTS user_roles (
     FOREIGN KEY (role_id) REFERENCES roles(role_id)  -- Foreign key linking to the roles table
 );
 
-CREATE TABLE IF NOT EXISTS roles (
-    role_id INT AUTO_INCREMENT PRIMARY KEY,      -- Unique identifier for each role
-    role_name VARCHAR(50) UNIQUE NOT NULL,        -- Name of the role (e.g., 'Client', 'Fund Manager'), must be unique and cannot be null
-    description_info VARCHAR(255)                -- Description of the role
+CREATE TABLE IF NOT EXISTS permission (
+    permission_id INT AUTO_INCREMENT PRIMARY KEY,
+    permission_name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT
+);
+CREATE TABLE IF NOT EXISTS role_permission (
+    role_id INT,
+    permission_id INT,
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES role(role_id),
+    FOREIGN KEY (permission_id) REFERENCES permission(permission_id)
 );
 
 CREATE TABLE IF NOT EXISTS nasdaq_listed_equities (

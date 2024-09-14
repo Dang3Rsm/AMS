@@ -77,6 +77,33 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 execute_query(sql_insert_query)
 
 sql_insert_query = '''
+INSERT INTO permission (permission_name, description) VALUES
+('manage_users', 'Can manage users and their roles'),
+('execute_trades', 'Can execute trades for clients'),
+('view_portfolio', 'Can view portfolio details'),
+('generate_reports', 'Can generate reports');
+'''
+
+execute_query(sql_insert_query)
+
+sql_insert_query = '''
+INSERT INTO role_permission (role_id, permission_id) VALUES
+(1, 1), -- Admin
+(1, 2), -- Admin
+(1, 3), -- Admin
+(1, 4), -- Admin
+(2, 2), -- Manager
+(2, 3), -- Manager
+(2, 4), -- Manager
+(3, 3), -- Analyst
+(3, 4), -- Analyst
+(4, 4); -- User
+
+'''
+
+execute_query(sql_insert_query)
+
+sql_insert_query = '''
 INSERT INTO user (first_name, last_name, email, password, role_id, phone_number, dob, street_address, city, state, pincode, country, is_active, created_by, updated_by) VALUES
 ('John', 'Doe', 'john.doe@example.com', 'hashed_password_1', 3, '9876543210', '1990-05-15', '123 Main St', 'New York', 'NY', '10001', 'USA', TRUE, 1, 1),
 ('Alice', 'Smith', 'alice.smith@example.com', 'hashed_password_2', 2, '9876543211', '1985-07-21', '456 Elm St', 'Chicago', 'IL', '60601', 'USA', TRUE, 1, 1),
