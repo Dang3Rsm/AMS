@@ -1,6 +1,10 @@
 from app import app
 from app.models.models import User
 # just a template, we have to create it custom
+@app.route('/')
+def get_users():
+    return "status:connected"
+
 @app.route('/users')
 def get_users():
     user_model = User()
