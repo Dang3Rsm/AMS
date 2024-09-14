@@ -39,6 +39,42 @@ conn = pymysql.connect(
   
 cur = conn.cursor()
 
+def execute_query(sql_query):
+    try:
+        cur.execute("SET FOREIGN_KEY_CHECKS=0;")
+        cur.execute(sql_insert_query)
+        cur.execute("SET FOREIGN_KEY_CHECKS=1;")
+    except Exception as e:
+        print(e)
+    finally:
+        cur.execute("SET FOREIGN_KEY_CHECKS=1;")
+
+sql_insert_query = '''
+INSERT INTO roles (role_id, role_name, description_info) VALUES
+(1, 'Admin', 'Full access to all system features'),
+(2, 'Manager', 'Access to manage user accounts and reports'),
+(3, 'Analyst', 'Access to view reports and data'),
+(4, 'User', 'Basic access to their own data and features');
+
+'''
+execute_query(sql_insert_query)
+
+sql_insert_query = '''
+INSERT INTO user_roles (user_id, role_id) VALUES
+(1, 4), -- User
+(2, 4), -- User
+(3, 4), -- User
+(4, 4), -- User
+(5, 4), -- User
+(6, 4), -- User
+(7, 4), -- User
+(8, 4), -- User
+(9, 4), -- User
+(10, 4); -- User
+'''
+
+execute_query(sql_insert_query)
+
 sql_insert_query = '''
 INSERT INTO user (first_name, last_name, email, password, role_id, phone_number, dob, street_address, city, state, pincode, country, is_active, created_by, updated_by) VALUES
 ('John', 'Doe', 'john.doe@example.com', 'hashed_password_1', 3, '9876543210', '1990-05-15', '123 Main St', 'New York', 'NY', '10001', 'USA', TRUE, 1, 1),
@@ -52,8 +88,34 @@ INSERT INTO user (first_name, last_name, email, password, role_id, phone_number,
 ('Isabella', 'Garcia', 'isabella.garcia@example.com', 'hashed_password_9', 2, '9876543218', '1994-10-19', '103 Spruce St', 'Houston', 'TX', '77001', 'USA', TRUE, 1, 1),
 ('Jack', 'Martinez', 'jack.martinez@example.com', 'hashed_password_10', 3, '9876543219', '1988-12-14', '104 Ash St', 'Denver', 'CO', '80201', 'USA', TRUE, 1, 1);
 '''
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
+sql_insert_query = '''  
+INSERT INTO nasdaq_listed_equities (symbol, name, country, sector, industry) VALUES
+('AAPL', 'Apple Inc.', 'United States', 'Technology', 'Consumer Electronics'),
+('MSFT', 'Microsoft Corp.', 'United States', 'Technology', 'Software'),
+('GOOGL', 'Alphabet Inc.', 'United States', 'Communication Services', 'Internet Services'),
+('AMZN', 'Amazon.com Inc.', 'United States', 'Consumer Discretionary', 'E-commerce'),
+('TSLA', 'Tesla Inc.', 'United States', 'Consumer Discretionary', 'Automobiles'),
+('FB', 'Meta Platforms Inc.', 'United States', 'Communication Services', 'Social Media'),
+('NFLX', 'Netflix Inc.', 'United States', 'Communication Services', 'Streaming Media'),
+('NVDA', 'NVIDIA Corp.', 'United States', 'Technology', 'Semiconductors'),
+('INTC', 'Intel Corp.', 'United States', 'Technology', 'Semiconductors'),
+('ADBE', 'Adobe Inc.', 'United States', 'Technology', 'Software'),
+('CSCO', 'Cisco Systems Inc.', 'United States', 'Technology', 'Networking'),
+('ORCL', 'Oracle Corp.', 'United States', 'Technology', 'Software'),
+('BA', 'Boeing Co.', 'United States', 'Industrials', 'Aerospace'),
+('DIS', 'Walt Disney Co.', 'United States', 'Communication Services', 'Media'),
+('XOM', 'Exxon Mobil Corp.', 'United States', 'Energy', 'Oil & Gas'),
+('CVX', 'Chevron Corp.', 'United States', 'Energy', 'Oil & Gas'),
+('WMT', 'Walmart Inc.', 'United States', 'Consumer Staples', 'Retail'),
+('KO', 'Coca-Cola Co.', 'United States', 'Consumer Staples', 'Beverages'),
+('PFE', 'Pfizer Inc.', 'United States', 'Healthcare', 'Pharmaceuticals'),
+('JNJ', 'Johnson & Johnson', 'United States', 'Healthcare', 'Medical Devices'
+);
+'''
+
+execute_query(sql_insert_query)
 
 sql_insert_query = '''
 INSERT INTO nasdaq_equity_transactions (user_id, stock_id, transaction_type, quantity, price)
@@ -91,7 +153,7 @@ VALUES
 
 '''
 
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
 sql_insert_query = '''
 INSERT INTO nasdaq_equity_transactions (user_id, stock_id, transaction_type, quantity, price)
@@ -119,7 +181,7 @@ VALUES
 
 '''
 
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
 sql_insert_query = '''
 INSERT INTO client_portfolio (user_id, stock_id, quantity, average_price)
@@ -147,7 +209,7 @@ VALUES
 
 '''
 
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
 sql_insert_query = '''
 INSERT INTO funds (user_id, fund_name, fund_theme, strategy)
@@ -175,7 +237,7 @@ VALUES
 
 '''
 
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
 sql_insert_query = '''
 INSERT INTO fund_portfolio (fund_id, stock_id, quantity, average_price)
@@ -203,7 +265,7 @@ VALUES
 
 '''
 
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
 sql_insert_query = '''
 INSERT INTO client_orders (client_id, order_date, order_type, symbol, quantity, price, status, created_by, updated_by)
@@ -241,168 +303,155 @@ VALUES
 
 '''
 
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
 
 sql_insert_query = '''
-INSERT INTO fund_orders (fund_id, order_date, order_type, symbol, quantity, price, status, created_by, updated_by)
+INSERT INTO fund_orders (fund_id, stock_id, quantity, price, order_type, order_date, status, created_by, updated_by) VALUES
+(1, 1, 200, 146.50, 'BUY', '2023-07-01', 'Completed', 1, 1),
+(1, 2, 50, 2810.00, 'SELL', '2023-07-06', 'Completed', 1, 1),
+(1, 3, 75, 165.00, 'SELL', '2023-07-22', 'Pending', 1, 1),
+
+(2, 4, 150, 310.75, 'SELL', '2023-07-02', 'Pending', 2, 2),
+(2, 5, 90, 225.65, 'BUY', '2023-07-15', 'Pending', 2, 2),
+
+(3, 6, 100, 710.30, 'BUY', '2023-07-05', 'Completed', 3, 3),
+(3, 7, 85, 235.95, 'BUY', '2023-07-20', 'Completed', 3, 3),
+
+(4, 8, 45, 3550.25, 'BUY', '2023-07-10', 'Pending', 4, 4),
+(4, 9, 20, 605.00, 'SELL', '2023-07-25', 'Completed', 4, 4),
+
+(5, 10, 80, 610.45, 'SELL', '2023-07-12', 'Completed', 5, 5),
+(5, 11, 50, 190.00, 'BUY', '2023-07-28', 'Pending', 5, 5),
+
+(6, 12, 60, 325.10, 'SELL', '2023-07-18', 'Completed', 6, 6),
+(6, 13, 100, 215.75, 'BUY', '2023-07-30', 'Completed', 6, 6),
+
+(7, 14, 30, 710.00, 'BUY', '2023-07-05', 'Completed', 7, 7),
+(7, 15, 20, 147.00, 'SELL', '2023-07-20', 'Pending', 7, 7),
+
+(8, 16, 50, 2760.00, 'BUY', '2023-07-15', 'Completed', 8, 8),
+(8, 17, 25, 315.00, 'SELL', '2023-07-30', 'Pending', 8, 8),
+
+(9, 18, 15, 3570.00, 'BUY', '2023-07-22', 'Completed', 9, 9),
+(9, 19, 30, 605.00, 'SELL', '2023-07-30', 'Pending', 9, 9),
+
+(10, 20, 20, 230.00, 'BUY', '2023-07-25', 'Completed', 10, 10),
+(10, 1, 30, 240.00, 'SELL', '2023-07-30', 'Completed', 10, 10);
+
+'''
+
+execute_query(sql_insert_query)
+
+sql_insert_query = '''
+INSERT INTO equity_price_history (stock_id, price_date, open_price, close_price, high_price, low_price, volume) VALUES
+('1', '2023-09-01', 144.00, 145.50, 146.00, 143.50, 2000000),
+('1', '2023-09-02', 145.00, 146.50, 147.00, 144.00, 2100000),
+
+('2', '2023-09-01', 299.00, 300.75, 302.00, 298.50, 1500000),
+('2', '2023-09-02', 300.00, 301.50, 303.00, 299.50, 1550000),
+
+('3', '2023-09-01', 695.00, 700.30, 705.00, 690.00, 1200000),
+('3', '2023-09-02', 700.00, 705.30, 710.00, 695.00, 1250000),
+
+('4', '2023-09-01', 2780.00, 2800.00, 2820.00, 2760.00, 1000000),
+('4', '2023-09-02', 2800.00, 2810.00, 2830.00, 2790.00, 1020000),
+
+('5', '2023-09-01', 3450.00, 3500.25, 3520.00, 3430.00, 900000),
+('5', '2023-09-02', 3500.00, 3520.00, 3540.00, 3480.00, 950000);
+
+'''
+
+execute_query(sql_insert_query)
+
+sql_insert_query = '''
+INSERT INTO fund_price_history (fund_id, price, date)
 VALUES
-(1, '2023-07-01', 'BUY', 'AAPL', 200, 146.50, 'Completed', 1, 1),
-(1, '2023-07-06', 'SELL', 'GOOGL', 50, 2810.00, 'Completed', 1, 1),
-(1, '2023-07-22', 'SELL', 'JPM', 75, 165.00, 'Pending', 1, 1),
-
-(2, '2023-07-02', 'SELL', 'MSFT', 150, 310.75, 'Pending', 2, 2),
-(2, '2023-07-15', 'BUY', 'NVDA', 90, 225.65, 'Pending', 2, 2),
-
-(3, '2023-07-05', 'BUY', 'TSLA', 100, 710.30, 'Completed', 3, 3),
-(3, '2023-07-20', 'BUY', 'V', 85, 235.95, 'Completed', 3, 3),
-
-(4, '2023-07-10', 'BUY', 'AMZN', 45, 3550.25, 'Pending', 4, 4),
-(4, '2023-07-25', 'SELL', 'NFLX', 20, 605.00, 'Completed', 4, 4),
-
-(5, '2023-07-12', 'SELL', 'NFLX', 80, 610.45, 'Completed', 5, 5),
-(5, '2023-07-28', 'BUY', 'DIS', 50, 190.00, 'Pending', 5, 5),
-
-(6, '2023-07-18', 'SELL', 'FB', 60, 325.10, 'Completed', 6, 6),
-(6, '2023-07-30', 'BUY', 'BA', 100, 215.75, 'Completed', 6, 6),
-
-(7, '2023-07-05', 'BUY', 'TSLA', 30, 710.00, 'Completed', 7, 7),
-(7, '2023-07-20', 'SELL', 'AAPL', 20, 147.00, 'Pending', 7, 7),
-
-(8, '2023-07-15', 'BUY', 'GOOGL', 50, 2760.00, 'Completed', 8, 8),
-(8, '2023-07-30', 'SELL', 'MSFT', 25, 315.00, 'Pending', 8, 8),
-
-(9, '2023-07-22', 'BUY', 'AMZN', 15, 3570.00, 'Completed', 9, 9),
-(9, '2023-07-30', 'SELL', 'NFLX', 30, 605.00, 'Pending', 9, 9),
-
-(10, '2023-07-25', 'BUY', 'NVDA', 20, 230.00, 'Completed', 10, 10),
-(10, '2023-07-30', 'SELL', 'V', 30, 240.00, 'Completed', 10, 10);
+(1, 101.25, '2023-08-01'),
+(1, 102.50, '2023-08-02'),
+(1, 103.75, '2023-08-03'),
+(1, 104.00, '2023-08-04'),
+(1, 105.25, '2023-08-05'),
+(2, 50.75, '2023-08-01'),
+(2, 51.50, '2023-08-02'),
+(2, 52.25, '2023-08-03'),
+(2, 53.00, '2023-08-04'),
+(2, 54.25, '2023-08-05'),
+(3, 75.00, '2023-08-01'),
+(3, 76.25, '2023-08-02'),
+(3, 77.50, '2023-08-03'),
+(3, 78.00, '2023-08-04'),
+(3, 79.25, '2023-08-05'),
+(4, 123.45, '2023-08-01'),
+(4, 124.00, '2023-08-02'),
+(4, 125.75, '2023-08-03'),
+(4, 126.50, '2023-08-04'),
+(4, 127.25, '2023-08-05'),
+(5, 98.30, '2023-08-01'),
+(5, 99.00, '2023-08-02'),
+(5, 100.50, '2023-08-03'),
+(5, 101.20, '2023-08-04'),
+(5, 102.00, '2023-08-05');
 
 '''
 
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
 sql_insert_query = '''
-INSERT INTO equity_price_history (symbol, price_date, open_price, close_price, high_price, low_price, volume) VALUES
-('AAPL', '2023-09-01', 144.00, 145.50, 146.00, 143.50, 2000000),
-('AAPL', '2023-09-02', 145.00, 146.50, 147.00, 144.00, 2100000),
-
-('MSFT', '2023-09-01', 299.00, 300.75, 302.00, 298.50, 1500000),
-('MSFT', '2023-09-02', 300.00, 301.50, 303.00, 299.50, 1550000),
-
-('TSLA', '2023-09-01', 695.00, 700.30, 705.00, 690.00, 1200000),
-('TSLA', '2023-09-02', 700.00, 705.30, 710.00, 695.00, 1250000),
-
-('GOOGL', '2023-09-01', 2780.00, 2800.00, 2820.00, 2760.00, 1000000),
-('GOOGL', '2023-09-02', 2800.00, 2810.00, 2830.00, 2790.00, 1020000),
-
-('AMZN', '2023-09-01', 3450.00, 3500.25, 3520.00, 3430.00, 900000),
-('AMZN', '2023-09-02', 3500.00, 3520.00, 3540.00, 3480.00, 950000);
-
-'''
-
-cur.execute(sql_insert_query)
-
-sql_insert_query = '''
-INSERT INTO fund_price_history (fund_id, price_date, open_price, close_price, high_price, low_price, volume) VALUES
-(1, '2023-08-01', 145.00, 145.50, 146.50, 144.50, 100000),
-(1, '2023-08-02', 146.00, 146.50, 147.50, 145.50, 105000),
-
-(2, '2023-08-02', 305.00, 300.75, 307.50, 298.50, 120000),
-(2, '2023-08-03', 301.00, 305.00, 308.00, 300.00, 125000),
-
-(3, '2023-08-03', 705.00, 700.30, 710.50, 695.00, 130000),
-(3, '2023-08-04', 702.00, 705.00, 712.00, 700.00, 135000);
-
-'''
-
-cur.execute(sql_insert_query)
-
-sql_insert_query = '''
-INSERT INTO watchlist (user_id, symbol, added_date, created_by, updated_by)
+INSERT INTO watchlist (user_id, stock_id, fund_id, added_at)
 VALUES
-(1, 'AAPL', '2023-08-01', 1, 1),
-(1, 'GOOGL', '2023-08-02', 1, 1),
-
-(2, 'MSFT', '2023-08-01', 2, 2),
-(2, 'NVDA', '2023-08-05', 2, 2),
-
-(3, 'TSLA', '2023-08-01', 3, 3),
-(3, 'V', '2023-08-07', 3, 3),
-
-(4, 'AMZN', '2023-08-01', 4, 4),
-(4, 'NFLX', '2023-08-10', 4, 4),
-
-(5, 'FB', '2023-08-02', 5, 5),
-(5, 'DIS', '2023-08-12', 5, 5),
-
-(6, 'BA', '2023-08-01', 6, 6),
-(6, 'XOM', '2023-08-15', 6, 6),
-
-(7, 'IBM', '2023-08-03', 7, 7),
-(7, 'INTC', '2023-08-18', 7, 7),
-
-(8, 'WMT', '2023-08-05', 8, 8),
-(8, 'HD', '2023-08-22', 8, 8),
-
-(9, 'MCD', '2023-08-07', 9, 9),
-(9, 'KO', '2023-08-28', 9, 9),
-
-(10, 'PFE', '2023-08-10', 10, 10),
-(10, 'MRK', '2023-08-25', 10, 10);
-
+(1, 1, NULL, '2023-08-01 10:00:00'),  -- User 1 watching Stock 1
+(1, 2, NULL, '2023-08-02 11:00:00'),  -- User 1 watching Stock 2
+(2, 3, NULL, '2023-08-03 12:00:00'),  -- User 2 watching Stock 3
+(2, NULL, 1, '2023-08-04 13:00:00'),  -- User 2 watching Fund 1
+(3, 4, NULL, '2023-08-05 14:00:00'),  -- User 3 watching Stock 4
+(3, NULL, 2, '2023-08-06 15:00:00'),  -- User 3 watching Fund 2
+(4, 5, NULL, '2023-08-07 16:00:00'),  -- User 4 watching Stock 5
+(4, NULL, 3, '2023-08-08 17:00:00'),  -- User 4 watching Fund 3
+(5, 6, NULL, '2023-08-09 18:00:00'),  -- User 5 watching Stock 6
+(5, 7, NULL, '2023-08-10 19:00:00'),  -- User 5 watching Stock 7
+(6, NULL, 4, '2023-08-11 20:00:00'),  -- User 6 watching Fund 4
+(6, NULL, 5, '2023-08-12 21:00:00'),  -- User 6 watching Fund 5
+(7, 8, NULL, '2023-08-13 22:00:00'),  -- User 7 watching Stock 8
+(7, 9, NULL, '2023-08-14 23:00:00'),  -- User 7 watching Stock 9
+(8, NULL, 6, '2023-08-15 08:00:00'),  -- User 8 watching Fund 6
+(8, NULL, 7, '2023-08-16 09:00:00'),  -- User 8 watching Fund 7
+(9, 10, NULL, '2023-08-17 10:00:00'), -- User 9 watching Stock 10
+(9, NULL, 8, '2023-08-18 11:00:00'),  -- User 9 watching Fund 8
+(10, NULL, 9, '2023-08-19 12:00:00'), -- User 10 watching Fund 9
+(10, NULL, 10, '2023-08-20 13:00:00') -- User 10 watching Fund 10
+;
 '''
 
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
 sql_insert_query = '''
-INSERT INTO user_audit (user_id, action, timestamp, ip_address)
+INSERT INTO user_audit (user_id, action, field_changed, old_value, new_value, change_date)
 VALUES
-(1, 'Logged In', '2023-08-01 10:15:30', '192.168.1.1'),
-(1, 'Password Changed', '2023-08-01 10:30:00', '192.168.1.1'),
-(1, 'Logged Out', '2023-08-01 10:40:00', '192.168.1.1'),
-
-(2, 'Logged In', '2023-08-01 10:16:00', '192.168.1.2'),
-(2, 'Logged Out', '2023-08-01 10:36:00', '192.168.1.2'),
-
-(3, 'Logged In', '2023-08-01 10:18:00', '192.168.1.3'),
-(3, 'Logged Out', '2023-08-01 10:38:00', '192.168.1.3'),
-
-(4, 'Logged In', '2023-08-01 10:20:00', '192.168.1.4'),
-(4, 'Password Changed', '2023-08-01 10:35:00', '192.168.1.4'),
-
-(5, 'Logged In', '2023-08-01 10:22:00', '192.168.1.5'),
-(5, 'Logged Out', '2023-08-01 10:42:00', '192.168.1.5'),
-
-(6, 'Logged In', '2023-08-01 10:25:00', '192.168.1.6'),
-(6, 'Password Changed', '2023-08-01 10:45:00', '192.168.1.6'),
-
-(7, 'Logged In', '2023-08-01 10:28:00', '192.168.1.7'),
-(7, 'Logged Out', '2023-08-01 10:50:00', '192.168.1.7'),
-
-(8, 'Logged In', '2023-08-01 10:30:00', '192.168.1.8'),
-(8, 'Password Changed', '2023-08-01 10:55:00', '192.168.1.8'),
-
-(9, 'Logged In', '2023-08-01 10:32:00', '192.168.1.9'),
-(9, 'Logged Out', '2023-08-01 10:57:00', '192.168.1.9'),
-
-(10, 'Logged In', '2023-08-01 10:35:00', '192.168.1.10'),
-(10, 'Logged Out', '2023-08-01 11:00:00', '192.168.1.10');
-
+(1, 'INSERT', NULL, NULL, 'John Doe', '2023-08-01 10:00:00'),  -- User 1 inserted a new record with name 'John Doe'
+(2, 'UPDATE', 'email', 'old.email@example.com', 'new.email@example.com', '2023-08-02 11:30:00'),  -- User 2 updated email field
+(3, 'DELETE', 'username', 'jane_doe', NULL, '2023-08-03 14:15:00'),  -- User 3 deleted username 'jane_doe'
+(4, 'INSERT', NULL, NULL, 'Alice Smith', '2023-08-04 09:45:00'),  -- User 4 inserted a new record with name 'Alice Smith'
+(5, 'UPDATE', 'phone', '123-456-7890', '098-765-4321', '2023-08-05 16:00:00'),  -- User 5 updated phone field
+(6, 'DELETE', 'address', '123 Elm St', NULL, '2023-08-06 13:30:00'),  -- User 6 deleted address field
+(7, 'INSERT', NULL, NULL, 'Bob Johnson', '2023-08-07 08:00:00'),  -- User 7 inserted a new record with name 'Bob Johnson'
+(8, 'UPDATE', 'name', 'Michael Brown', 'Mike Brown', '2023-08-08 18:30:00'),  -- User 8 updated name field
+(9, 'DELETE', 'email', 'mike.brown@example.com', NULL, '2023-08-09 14:45:00'),  -- User 9 deleted email field
+(10, 'INSERT', NULL, NULL, 'Laura White', '2023-08-10 17:00:00'),  -- User 10 inserted a new record with name 'Laura White'
+(11, 'UPDATE', 'address', '456 Oak St', '789 Pine St', '2023-08-11 11:15:00'),  -- User 11 updated address field
+(12, 'DELETE', 'phone', '555-555-5555', NULL, '2023-08-12 12:30:00'),  -- User 12 deleted phone field
+(13, 'INSERT', NULL, NULL, 'Charlie Davis', '2023-08-13 13:45:00'),  -- User 13 inserted a new record with name 'Charlie Davis'
+(14, 'UPDATE', 'username', 'charlie_davis', 'charlie_d', '2023-08-14 15:00:00'),  -- User 14 updated username field
+(15, 'DELETE', 'name', 'Charlie Davis', NULL, '2023-08-15 10:00:00'),  -- User 15 deleted name field
+(16, 'INSERT', NULL, NULL, 'Emily Wilson', '2023-08-16 11:30:00'),  -- User 16 inserted a new record with name 'Emily Wilson'
+(17, 'UPDATE', 'email', 'emily.wilson@example.com', 'emily.w@example.com', '2023-08-17 12:15:00'),  -- User 17 updated email field
+(18, 'DELETE', 'address', '789 Pine St', NULL, '2023-08-18 09:45:00'),  -- User 18 deleted address field
+(19, 'INSERT', NULL, NULL, 'Daniel Lee', '2023-08-19 13:00:00'),  -- User 19 inserted a new record with name 'Daniel Lee'
+(20, 'UPDATE', 'phone', '444-444-4444', '555-555-5555', '2023-08-20 14:30:00')  -- User 20 updated phone field
+;
 '''
 
-cur.execute(sql_insert_query)
-
-sql_insert_query = '''
-INSERT INTO roles (role_id, role_name, description) VALUES
-(1, 'Admin', 'Full access to all system features'),
-(2, 'Manager', 'Access to manage user accounts and reports'),
-(3, 'Analyst', 'Access to view reports and data'),
-(4, 'User', 'Basic access to their own data and features');
-
-'''
-
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
 
 sql_insert_query = '''
 INSERT INTO user_roles (user_id, role_id) VALUES
@@ -418,4 +467,4 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 (10, 4); -- User
 '''
 
-cur.execute(sql_insert_query)
+execute_query(sql_insert_query)
