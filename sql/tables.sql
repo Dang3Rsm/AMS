@@ -23,10 +23,17 @@ CREATE TABLE IF NOT EXISTS user (
 );
 
 CREATE TABLE IF NOT EXISTS user_roles (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,      -- Unique identifier for each role
+    role_id INT,                                 -- ID of the role assigned to the user
+    PRIMARY KEY (user_id, role_id),              -- Composite primary key to ensure uniqueness
+    FOREIGN KEY (user_id) REFERENCES user(userID),  -- Foreign key linking to the user table
+    FOREIGN KEY (role_id) REFERENCES roles(role_id)  -- Foreign key linking to the roles table
+)
+
+CREATE TABLE IF NOT EXISTS roles (
     role_id INT AUTO_INCREMENT PRIMARY KEY,      -- Unique identifier for each role
     role_name VARCHAR(50) UNIQUE NOT NULL        -- Name of the role (e.g., 'Client', 'Fund Manager'), must be unique and cannot be null
 );
-
 
 CREATE TABLE IF NOT EXISTS nasdaq_listed_equities (
     id INT AUTO_INCREMENT PRIMARY KEY,                  -- Unique identifier for each stock entry
