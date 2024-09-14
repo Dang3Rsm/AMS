@@ -43,6 +43,7 @@ def execute_query(sql_query):
     try:
         cur.execute("SET FOREIGN_KEY_CHECKS=0;")
         cur.execute(sql_insert_query)
+        cur.commit()
         cur.execute("SET FOREIGN_KEY_CHECKS=1;")
     except Exception as e:
         print(e)
