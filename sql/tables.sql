@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS client_orders (
     created_by INT,                                   -- ID of the user who created this order
     updated_by INT,                                   -- ID of the user who last updated this order
     FOREIGN KEY (client_id) REFERENCES user(userID),   -- Foreign key constraint to link the client
+    FOREIGN KEY (symbol) REFERENCES nasdaq_listed_equities(symbol),  -- Foreign key constraint for stock reference
     FOREIGN KEY (created_by) REFERENCES user(userID),   -- Foreign key linking to the user who created the order
     FOREIGN KEY (updated_by) REFERENCES user(userID)    -- Foreign key linking to the user who last updated the order
 );
