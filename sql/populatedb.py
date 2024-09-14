@@ -1,4 +1,3 @@
-# -- Here is the list of all the tables based on the schema you provided:
 
 #     -- user
 #     -- roles
