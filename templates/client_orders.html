@@ -1,0 +1,40 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+client orders
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>Client Orders Table</h1>
+</header>
+
+<section id="client_orders_table">
+    <h2>Client Orders</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Client ID</th>
+                <th>Asset Name</th>
+                <th>Order Type</th>
+                <th>Quantity</th>
+                <th>Order Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Client Order Data Example -->
+            <tr>
+                <td>2001</td>
+                <td>1</td>
+                <td>Apple Inc. Stock</td>
+                <td>Buy</td>
+                <td>10 shares</td>
+                <td>2024-09-15</td>
+            </tr>
+            <!-- Add more client orders as needed -->
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}

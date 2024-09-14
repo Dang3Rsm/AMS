@@ -1,0 +1,38 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+NASDAQ equity transaction
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>NASDAQ Equity Transactions Table</h1>
+</header>
+
+<section id="nasdaq_equity_transactions_table">
+    <h2>NASDAQ Equity Transactions</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Ticker Symbol</th>
+                <th>Transaction Type</th>
+                <th>Amount</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Transaction Data Example -->
+            <tr>
+                <td>1001</td>
+                <td>AAPL</td>
+                <td>Buy</td>
+                <td>10 shares</td>
+                <td>2024-09-15</td>
+            </tr>
+            <!-- Add more transactions as needed -->
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}
