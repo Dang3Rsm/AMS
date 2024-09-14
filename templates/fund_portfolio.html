@@ -1,0 +1,36 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+fund portfolio
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>Fund Portfolio Table</h1>
+</header>
+
+<section id="fund_portfolio_table">
+    <h2>Fund Portfolio</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Client ID</th>
+                <th>Fund Name</th>
+                <th>Investment Amount (USD)</th>
+                <th>Current Value (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Fund Portfolio Data Example -->
+            <tr>
+                <td>1</td>
+                <td>Growth Fund</td>
+                <td>$50,000</td>
+                <td>$55,000</td>
+            </tr>
+            <!-- Add more fund portfolio items as needed -->
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}

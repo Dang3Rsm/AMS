@@ -1,0 +1,19 @@
+{% extends indexlayout.html %}
+
+{% block title %}
+login
+{% endblock %}
+
+{% block body %}
+
+<form action="/login" method="post">
+    <label for="phone">Phone Number:</label>
+    <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" required><br>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br>
+
+    <input type="submit" value="login">
+</form>
+
+{% endblock %}

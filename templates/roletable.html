@@ -1,0 +1,33 @@
+{% extends "indexlayout.html" %}
+
+{% block title %}
+user table 
+{% endblock %}
+
+{% block body %}
+<header>
+    <h1>Roles Table</h1>
+</header>
+
+<section id="roles_table">
+    <h2>Roles</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Role ID</th>
+                <th>Role Name</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Role Data Example -->
+            <tr>
+                <td>1</td>
+                <td>Admin</td>
+                <td>Administrator with full access</td>
+            </tr>
+            <!-- Add more roles as needed -->
+        </tbody>
+    </table>
+</section>
+{% endblock %}

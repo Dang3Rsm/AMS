@@ -1,0 +1,36 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+client portfolio
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>Client Portfolio Table</h1>
+</header>
+
+<section id="client_portfolio_table">
+    <h2>Client Portfolio</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Client ID</th>
+                <th>Asset Type</th>
+                <th>Asset Name</th>
+                <th>Value (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Client Portfolio Data Example -->
+            <tr>
+                <td>1</td>
+                <td>Real Estate</td>
+                <td>2-bedroom Apartment</td>
+                <td>$500,000</td>
+            </tr>
+            <!-- Add more client portfolio items as needed -->
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}

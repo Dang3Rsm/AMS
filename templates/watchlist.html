@@ -1,0 +1,36 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+watchlist
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>Watchlist Table</h1>
+</header>
+
+<section id="watchlist_table">
+    <h2>Watchlist</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Client ID</th>
+                <th>Asset Name</th>
+                <th>Type</th>
+                <th>Added Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Watchlist Data Example -->
+            <tr>
+                <td>1</td>
+                <td>Apple Inc. Stock</td>
+                <td>Equity</td>
+                <td>2024-09-15</td>
+            </tr>
+            <!-- Add more watchlist items as needed -->
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}
