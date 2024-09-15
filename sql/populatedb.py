@@ -54,6 +54,16 @@ def execute_query(sql_query):
         cur.execute("SET FOREIGN_KEY_CHECKS=1;")
         conn.commit()
 
+#creating tables using the 'tables.sql' file
+try:
+    with open('tables.sql', 'r') as sqlFile:
+        sqlScripts = sqlFile.read()
+    for statement in sqlScripts.split(';'):
+        if statement.strip():
+            cur.execute(statement)
+except Exception as e:
+    print(f"Error reading SQL file: {e}")
+
 sql_insert_query = '''
 INSERT INTO roles (role_id, role_name, description_info) VALUES
 (1, 'Admin', 'Full access to all system features'),
