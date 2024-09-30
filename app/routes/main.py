@@ -14,6 +14,4 @@ main = Blueprint('main', __name__)
 def index():
     # print(current_app.config['BRAND_NAME'])
     # User.get_all_users()
-    print("DEBUG")
-    print(User.get_last_userID())
     return render_template('index.html',brand_name=current_app.config['BRAND_NAME'])
