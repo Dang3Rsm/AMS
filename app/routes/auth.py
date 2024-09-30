@@ -1,4 +1,3 @@
-# Authentication-related routes
 from app.models.models import User
 from flask import Blueprint, render_template
 from flask import current_app
@@ -22,9 +21,12 @@ def check_password(password, hashed_password):
     print("Error checking password:", e)
     return False
 
-@auth.route('/login')
+@auth.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html',brand_name=current_app.config['BRAND_NAME'])
+    if request.method == 'POST':
+        return redirect(url_for('dashboard.user_dashboard'))  
+    else:
+        return render_template('login.html',brand_name=current_app.config['BRAND_NAME'])
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
@@ -48,9 +50,13 @@ def register():
            print("USER CREATED >>> "+ user_id)
         else:
            print("FAILED USER CREATION")
-        return redirect(url_for('main.index'))
+        return redirect(url_for('auth.login'))
     else:
         roles = User.get_roles()
         if None == roles:
            roles = []
         return render_template('register.html', brand_name=current_app.config['BRAND_NAME'],roles=roles)
+    
+@auth.route('/logout', methods=['GET', 'POST'])
+def logout():
+   return redirect(url_for('main.index'))

@@ -10,8 +10,12 @@ def create_app():
     # Import and register blueprints
     from app.routes.main import main
     from app.routes.auth import auth
+    from app.routes.dashboard import db
+    from app.routes.user import usr
 
     app.register_blueprint(main)
     app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(db, url_prefix='/dashboard')
+    app.register_blueprint(usr, url_prefix='/dashboard/user')
 
     return app
