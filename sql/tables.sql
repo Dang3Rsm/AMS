@@ -22,19 +22,20 @@ CREATE TABLE IF NOT EXISTS user (
     FOREIGN KEY (updated_by) REFERENCES user(userID)    -- Foreign key linking to the user who last updated this record
 );
 
-CREATE TABLE IF NOT EXISTS roles (
+CREATE TABLE IF NOT EXISTS user_roles (
     role_id INT AUTO_INCREMENT PRIMARY KEY,      -- Unique identifier for each role
     role_name VARCHAR(50) UNIQUE NOT NULL,        -- Name of the role (e.g., 'Client', 'Fund Manager'), must be unique and cannot be null
     description_info VARCHAR(255)                -- Description of the role
 );
 
-CREATE TABLE IF NOT EXISTS user_roles (
-    user_id INT ,                                -- Unique identifier for each role
-    role_id INT,                                 -- ID of the role assigned to the user
-    PRIMARY KEY (user_id, role_id),              -- Composite primary key to ensure uniqueness
-    FOREIGN KEY (user_id) REFERENCES user(userID),  -- Foreign key linking to the user table
-    FOREIGN KEY (role_id) REFERENCES roles(role_id)  -- Foreign key linking to the roles table
-);
+-- Deprecated (useless and changed name)
+-- CREATE TABLE IF NOT EXISTS user_roles (
+--     user_id INT ,                                -- Unique identifier for each role
+--     role_id INT,                                 -- ID of the role assigned to the user
+--     PRIMARY KEY (user_id, role_id),              -- Composite primary key to ensure uniqueness
+--     FOREIGN KEY (user_id) REFERENCES user(userID),  -- Foreign key linking to the user table
+--     FOREIGN KEY (role_id) REFERENCES roles(role_id)  -- Foreign key linking to the roles table
+-- );
 
 CREATE TABLE IF NOT EXISTS permission (
     permission_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,7 +46,7 @@ CREATE TABLE IF NOT EXISTS role_permission (
     role_id INT,
     permission_id INT,
     PRIMARY KEY (role_id, permission_id),
-    FOREIGN KEY (role_id) REFERENCES role(role_id),
+    FOREIGN KEY (role_id) REFERENCES user_roles(role_id),
     FOREIGN KEY (permission_id) REFERENCES permission(permission_id)
 );
 

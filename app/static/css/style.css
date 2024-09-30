@@ -1,3 +1,45 @@
-html {
-    background-color: beige;
+:root {
+    --primary-color: #4169e1;  /* Royal Blue */
+    --secondary-color: #2c3e50; /* Midnight Blue */
+    --success-color: #28a745; /* Bootstrap Green */
+    --danger-color: #800020; /* Burgundy Red */
+    --warning-color: #ffcc00; /* Bright Yellow */
+    --info-color: #3498db; /* Soft Blue */
+    --light-color: #1c1c1c; /* Dark background for dark mode */
+    --dark-color: #0e0e10; /* Very dark (midnight) background */
+    --navbar-bg: var(--dark-color); /* Navbar background in very dark tone */
+    --navbar-text-color: #4169e1; /* Royal Blue for navbar text */
+    
+    --link-hover-color: #1e90ff; /* Brighter blue for hover */
+    --text-color: #d1d1d1; /* Light gray for body text */
+    --button-hover-bg: #2c3e50; /* Midnight blue for button hover */
+    --brand-name: "π-AMS";
 }
+/* 
+body {
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+.navbar {
+    background-color: var(--navbar-bg);
+    color: var(--navbar-text-color);
+}
+
+.navbar-brand, .nav-link {
+    color: var(--navbar-text-color) !important;
+}
+
+.nav-link:hover {
+    color: var(--primary-color) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--dark-color);
+    border-color: var(--dark-color);
+} */

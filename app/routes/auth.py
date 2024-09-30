@@ -1,13 +1,56 @@
 # Authentication-related routes
-
+from app.models.models import User
 from flask import Blueprint, render_template
+from flask import current_app
+from flask import request
+from flask import url_for
+from flask import redirect
+import bcrypt
 
 auth = Blueprint('auth', __name__)
 
+
+def generate_hash_password(password):
+  salt = bcrypt.gensalt()
+  hashed_password = bcrypt.hashpw(password.encode(), salt)
+  return hashed_password.decode()
+
+def check_password(password, hashed_password):
+  try:
+    return bcrypt.checkpw(password.encode(), hashed_password.encode())
+  except ValueError as e:
+    print("Error checking password:", e)
+    return False
+
 @auth.route('/login')
 def login():
-    return render_template('login.html')
+    return render_template('login.html',brand_name=current_app.config['BRAND_NAME'])
 
-@auth.route('/register')
+@auth.route('/register', methods=['GET', 'POST'])
 def register():
-    return render_template('register.html')
+    if request.method == 'POST':
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
+        email = request.form['email']
+        phoneno = request.form['phone_number']
+        dob = request.form['dob']
+        street = request.form['street_address']
+        city = request.form['city']
+        state = request.form['state']
+        pincode = request.form['pincode']
+        country = request.form['country']
+        password = request.form['password']
+        role_id = request.form['role']
+        hashed_password = generate_hash_password(password)
+        user = User(first_name,last_name,email,phoneno,hashed_password,role_id,dob,street,city,state,pincode,country)
+        user_id = user.register_user()
+        if user_id:
+           print("USER CREATED >>> "+ user_id)
+        else:
+           print("FAILED USER CREATION")
+        return redirect(url_for('main.index'))
+    else:
+        roles = User.get_roles()
+        if None == roles:
+           roles = []
+        return render_template('register.html', brand_name=current_app.config['BRAND_NAME'],roles=roles)

@@ -11,7 +11,7 @@ def get_db_connection():
         host                =            current_app.config['DB_HOST'],
         password            =            current_app.config['DB_PASSWORD'],
         read_timeout        =            current_app.config['DB_READ_TIMEOUT'],
-        port                =            int(current_app.config['DB_PORT']),
+        port                =            current_app.config['DB_PORT'],
         user                =            current_app.config['DB_USER'],
         write_timeout       =            current_app.config['DB_WRITE_TIMEOUT'],
     )

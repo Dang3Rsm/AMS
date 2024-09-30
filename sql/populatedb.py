@@ -1,6 +1,5 @@
 
 #     -- user
-#     -- roles
 #     -- user_roles
 #     -- nasdaq_listed_equities
 #     -- nasdaq_equity_transactions
@@ -53,9 +52,9 @@ def execute_query(sql_query):
     finally:
         cur.execute("SET FOREIGN_KEY_CHECKS=1;")
         conn.commit()
-
+#changed name of roles table to user_roles
 sql_insert_query = '''
-INSERT INTO roles (role_id, role_name, description_info) VALUES
+INSERT INTO user_roles (role_id, role_name, description_info) VALUES
 (1, 'Admin', 'Full access to all system features'),
 (2, 'Manager', 'Access to manage user accounts and reports'),
 (3, 'Analyst', 'Access to view reports and data'),
@@ -64,21 +63,22 @@ INSERT INTO roles (role_id, role_name, description_info) VALUES
 '''
 execute_query(sql_insert_query)
 
-sql_insert_query = '''
-INSERT INTO user_roles (user_id, role_id) VALUES
-(1, 4), -- User
-(2, 4), -- User
-(3, 4), -- User
-(4, 4), -- User
-(5, 4), -- User
-(6, 4), -- User
-(7, 4), -- User
-(8, 4), -- User
-(9, 4), -- User
-(10, 4); -- User
-'''
+# this table is deprecated
+# sql_insert_query = '''
+# INSERT INTO user_roles (user_id, role_id) VALUES
+# (1, 4), -- User
+# (2, 4), -- User
+# (3, 4), -- User
+# (4, 4), -- User
+# (5, 4), -- User
+# (6, 4), -- User
+# (7, 4), -- User
+# (8, 4), -- User
+# (9, 4), -- User
+# (10, 4); -- User
+# '''
 
-execute_query(sql_insert_query)
+# execute_query(sql_insert_query)
 
 sql_insert_query = '''
 INSERT INTO permission (permission_name, description) VALUES
@@ -485,18 +485,19 @@ VALUES
 
 execute_query(sql_insert_query)
 
-sql_insert_query = '''
-INSERT INTO user_roles (user_id, role_id) VALUES
-(1, 4), -- User
-(2, 4), -- User
-(3, 4), -- User
-(4, 4), -- User
-(5, 4), -- User
-(6, 4), -- User
-(7, 4), -- User
-(8, 4), -- User
-(9, 4), -- User
-(10, 4); -- User
-'''
+# table deprecated
+# sql_insert_query = '''
+# INSERT INTO user_roles (user_id, role_id) VALUES
+# (1, 4), -- User
+# (2, 4), -- User
+# (3, 4), -- User
+# (4, 4), -- User
+# (5, 4), -- User
+# (6, 4), -- User
+# (7, 4), -- User
+# (8, 4), -- User
+# (9, 4), -- User
+# (10, 4); -- User
+# '''
 
-execute_query(sql_insert_query)
+# execute_query(sql_insert_query)
