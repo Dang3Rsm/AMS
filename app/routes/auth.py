@@ -47,7 +47,7 @@ def register():
         user = User(first_name,last_name,email,phoneno,hashed_password,role_id,dob,street,city,state,pincode,country)
         user_id = user.register_user()
         if user_id:
-           print("USER CREATED >>> "+ user_id)
+           print("USER CREATED >>> "+ str(user_id))
         else:
            print("FAILED USER CREATION")
         return redirect(url_for('auth.login'))

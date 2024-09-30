@@ -51,16 +51,14 @@ class User:
             """
             cursor.execute(query, (self.first_name, self.last_name, self.email, self.password, self.role_id, self.phoneno, self.dob, self.street, self.city, self.state, self.pincode, self.country))
             conn.commit()
-            conn.close()
             last_user_id = User.get_last_userID()
-            query = "UPDATE user SET created_by = %s, updated_by = %s WHERE userID = %s"
-            cursor.execute(query, (last_user_id, last_user_id, last_user_id))
+            query = f"UPDATE user SET created_by = {last_user_id}, updated_by = {last_user_id} WHERE userID = {last_user_id}"
+            cursor.execute(query)
             conn.commit()
-            audit_query = """
-                INSERT INTO user_audit (user_id, action, field_changed, old_value, new_value)
-                VALUES (%s, 'INSERT', NULL, NULL, %s)
-            """
-            cursor.execute(audit_query, (last_user_id, last_user_id))
+            action = "INSERT"
+            field_changed = "created_by"
+            audit_query = f"INSERT INTO user_audit (user_id, action, field_changed, new_value) VALUES ({last_user_id}, 'INSERT', 'created_by', {last_user_id}); "
+            cursor.execute(audit_query)
             conn.commit()
             return last_user_id
         except Exception as e:
@@ -84,8 +82,8 @@ class User:
 
     @staticmethod
     def get_user_by_id(user_id):
+        conn = get_db_connection()
         try:
-            conn = get_db_connection()
             cursor = conn.cursor()
             query = "SELECT * FROM users WHERE id = %s"
             cursor.execute(query, (user_id,))
@@ -99,8 +97,8 @@ class User:
 
     @staticmethod
     def get_roles():
+        conn = get_db_connection()
         try:
-            conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("SELECT * FROM user_roles")
             roles = cursor.fetchall()
@@ -111,8 +109,8 @@ class User:
         
     @staticmethod
     def get_role_by_id():
+        conn = get_db_connection()
         try:
-            conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute("SELECT role_name FROM user_roles WHERE role_id = %s")
             role_id = cursor.fetchone()
@@ -127,15 +125,15 @@ class User:
 
     @staticmethod
     def get_last_userID():
+        conn = get_db_connection()
         try:
-            conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT LAST_INSERT_ID()")
+            cursor.execute("SELECT MAX(userID) FROM user")
             last_uid = cursor.fetchone()
             if last_uid:
-                return last_uid[0]
+                return last_uid["MAX(userID)"]
             else:
                 return None
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error at get_last_userID(): {e}")
             return None
