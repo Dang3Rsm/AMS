@@ -1,4 +1,4 @@
-from app.models.models import User
+from app.models.user_model import User
 from flask import render_template
 from flask import Blueprint
 from flask import current_app

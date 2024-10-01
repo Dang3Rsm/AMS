@@ -2,6 +2,30 @@
 
 {% block content %}
     <h1 class="mt-3">Mutual Funds</h1>
-        Funds here
+
+    <div class="row">
+        {% for fund in mutual_funds %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ fund.name }}</h5>
+                    <p class="card-text">
+                        <strong>Current Price:</strong> ${{ fund.current_price }}<br>
+                        <strong>Price Change:</strong> 
+                        <span class="{% if fund.change > 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ fund.change }}%
+                        </span>
+                    </p>
+                    <a href="{{ url_for('user.add_fund_to_watchlist', fund_id=fund.id) }}" class="btn btn-primary">
+                        Add to Watchlist
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
     </div>
+
+    {% if mutual_funds|length == 0 %}
+        <p class="text-center">No mutual funds available at the moment.</p>
+    {% endif %}
 {% endblock %}
