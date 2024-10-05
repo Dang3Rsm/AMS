@@ -225,7 +225,6 @@ class User:
     @staticmethod
     def set_user_darkMode(value:str=None,user_id:int=None):
         conn = get_db_connection()
-        print(f"value {value} user_id {user_id}")
         try:
             cursor = conn.cursor()
             value = str(value)

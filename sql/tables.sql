@@ -195,6 +195,7 @@ CREATE TABLE IF NOT EXISTS user_audit (
 
 CREATE TABLE IF NOT EXISTS system_settings (
     setting_id INT AUTO_INCREMENT PRIMARY KEY,
-    setting_name VARCHAR(255) UNIQUE NOT NULL,
-    setting_value VARCHAR(255) NOT NULL
+    setting_name VARCHAR(255),
+    setting_value VARCHAR(255),
+    user_id INT
 );
