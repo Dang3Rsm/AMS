@@ -1,13 +1,13 @@
-{% extends "dashboardLayout.html" %}
+{% extends "user/user_dashboardLayout.html" %}
 
 {% block content %}
     <h1 class="mt-3">Mutual Funds</h1>
 
     <div class="row">
         {% for fund in mutual_funds %}
-        <div class="col-md-4 mb-4">
+        <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
-                <div class="card-body">
+                <div class="card-body {% if user_.darkMode == 1 %}dark-mode{% endif %}">
                     <h5 class="card-title">{{ fund.name }}</h5>
                     <p class="card-text">
                         <strong>Current Price:</strong> ${{ fund.current_price }}<br>

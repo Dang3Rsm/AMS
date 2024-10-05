@@ -115,12 +115,12 @@ CREATE TABLE IF NOT EXISTS client_orders (
     quantity INT,                                      -- Quantity of stock in the order
     price DECIMAL(10, 2),                              -- Price at which the order was executed
     order_type ENUM('BUY', 'SELL') NOT NULL,           -- Indicates whether the order is a buy or sell
-    order_date DATE,                                  -- Date when the order was placed
+    order_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,   -- Date & time when the order was placed
     status ENUM('Pending', 'Completed', 'Cancelled') DEFAULT 'Pending', -- Status of the order
     created_by INT,                                   -- ID of the user who created this order
     updated_by INT,                                   -- ID of the user who last updated this order
     FOREIGN KEY (client_id) REFERENCES user(userID),   -- Foreign key constraint to link the client
-    FOREIGN KEY (symbol) REFERENCES nasdaq_listed_equities(symbol),  -- Foreign key constraint for stock reference
+    -- FOREIGN KEY (symbol) REFERENCES nasdaq_listed_equities(symbol),  -- Foreign key constraint for stock reference
     FOREIGN KEY (created_by) REFERENCES user(userID),   -- Foreign key linking to the user who created the order
     FOREIGN KEY (updated_by) REFERENCES user(userID)    -- Foreign key linking to the user who last updated the order
 );
@@ -153,6 +153,7 @@ CREATE TABLE IF NOT EXISTS equity_price_history (
     high_price DECIMAL(10, 2),                       -- Highest price of the stock during the day
     low_price DECIMAL(10, 2),                        -- Lowest price of the stock during the day
     volume BIGINT,                                  -- Volume of shares traded
+    percent_change DECIMAL(10, 2),                   -- percent change for day
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of when the record was created
     FOREIGN KEY (stock_id) REFERENCES nasdaq_listed_equities(id),  -- Foreign key reference to the stock
     UNIQUE(stock_id, price_date)                     -- Ensures there is only one record per stock per date

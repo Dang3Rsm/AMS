@@ -1,0 +1,43 @@
+{% extends "user/user_dashboardLayout.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Welcome, {{ user_.first_name }}!</h2>
+            <p>This is your dashboard.</p>
+
+            <!-- Example statistics section -->
+            <div class="row">
+                <div class="col-lg-6 col-md-8">
+                    <div class="card text-white bg-primary mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Profile Info</h5>
+                            <p class="card-text">Update your profile or view current settings.</p>
+                            <a href="#" class="btn btn-light">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-8">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Activity Log</h5>
+                            <p class="card-text">Track your recent activities.</p>
+                            <a href="#" class="btn btn-light">View Activity</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-8">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Notifications</h5>
+                            <p class="card-text">View your latest notifications.</p>
+                            <a href="#" class="btn btn-light">View Notifications</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

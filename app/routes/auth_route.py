@@ -4,29 +4,36 @@ from flask import current_app
 from flask import request
 from flask import url_for
 from flask import redirect
-import bcrypt
+from flask import session
+from ..decorators import debug
+from ..security import generate_hash_password
 
 auth = Blueprint('auth', __name__)
 
 
-def generate_hash_password(password):
-  salt = bcrypt.gensalt()
-  hashed_password = bcrypt.hashpw(password.encode(), salt)
-  return hashed_password.decode()
-
-def check_password(password, hashed_password):
-  try:
-    return bcrypt.checkpw(password.encode(), hashed_password.encode())
-  except ValueError as e:
-    print("Error checking password:", e)
-    return False
-
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        email = request.form.get("email")
+        password = request.form.get("password")
+        user_id, role_id = User.authenticate(email,password)
+        if user_id is None or role_id is None:
+           print("ERROR LOGIN: NO USER")
+           return redirect('auth.login')
+        session['user_id'] = user_id
+        session['role_id'] = role_id
         return redirect(url_for('dashboard.user_dashboard'))  
     else:
         return render_template('login.html',brand_name=current_app.config['BRAND_NAME'])
+    
+@auth.route('/admin_login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        session['user_id'] = 18
+        session['role_id'] = 4
+        return redirect(url_for('dashboard.admin_dashboard'))  
+    else:
+        return redirect(url_for('dashboard.admin_dashboard'))
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
@@ -44,7 +51,20 @@ def register():
         password = request.form['password']
         role_id = request.form['role']
         hashed_password = generate_hash_password(password)
-        user = User(first_name,last_name,email,phoneno,hashed_password,role_id,dob,street,city,state,pincode,country)
+        user = User(
+           first_name= first_name,
+           last_name= last_name,
+           email= email,
+           phoneno= phoneno,
+           password= hashed_password,
+           role_id= role_id,
+           dob= dob,
+           street= street,
+           city= city,
+           state= state,
+           pincode= pincode,
+           country= country
+           )
         user_id = user.register_user()
         if user_id:
            print("USER CREATED >>> "+ str(user_id))
@@ -59,4 +79,5 @@ def register():
     
 @auth.route('/logout', methods=['GET', 'POST'])
 def logout():
+   session.clear()
    return redirect(url_for('main.index'))

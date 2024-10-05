@@ -1,15 +1,15 @@
-{% extends "dashboardLayout.html" %}
+{% extends "admin/admin_dashboardLayout.html" %}
 
 {% block content %}
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <h2>Welcome, {{ user.first_name }}!</h2>
+            <h2>Welcome, {{ admin.first_name }}!</h2>
             <p>This is your dashboard.</p>
 
             <!-- Example statistics section -->
             <div class="row">
-                <div class="col-lg-4">
+                <div class="col-lg-6 col-md-8">
                     <div class="card text-white bg-primary mb-3">
                         <div class="card-body">
                             <h5 class="card-title">Profile Info</h5>
@@ -18,7 +18,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-6 col-md-8">
                     <div class="card text-white bg-success mb-3">
                         <div class="card-body">
                             <h5 class="card-title">Activity Log</h5>
@@ -27,7 +27,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-6 col-md-8">
                     <div class="card text-white bg-info mb-3">
                         <div class="card-body">
                             <h5 class="card-title">Notifications</h5>

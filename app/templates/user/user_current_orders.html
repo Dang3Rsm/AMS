@@ -1,0 +1,47 @@
+{% extends "user/user_dashboardLayout.html" %}
+
+{% block content %}
+    <h1 class="mt-3">Current Orders</h1>
+    <div class="table-responsive mt-3 {% if user_.darkMode == 1 %}bg-dark text-white{% endif %}">
+        <table class="table table-striped {% if user_.darkMode == 1 %}table-dark{% endif %}">
+            <thead class="{% if user_.darkMode == 1 %}thead-dark{% endif %}">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Time</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Symbol</th>
+                    <th scope="col">Qty</th>
+                    <th scope="col">Limit Price</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if orders %}
+                    {% for order in orders %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ order.order_datetime }}</td>
+                            <td>{{ order.order_type }}</td>
+                            <td>{{ order.symbol }}</td>
+                            <td>{{ order.quantity }}</td>
+                            <td>{{ order.price }}</td>
+                            <td class="{% if order.status == 'Pending' %}text-warning{% elif order.status == 'Completed' %}text-success{% elif order.status == 'Cancelled' %}text-danger{% endif %}">
+                                {{ order.status }}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('user.edit_order', order_id=order.order_id) }}" class="text-blue">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">No Orders</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

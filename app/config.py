@@ -4,6 +4,17 @@ from dotenv import load_dotenv
 load_dotenv()
 timeout = 10
 
+# def fetch_stock_data_wrapper():
+#     Stock.fetch_stock_data() 
+# JOBS                    =       [
+#                                     {
+#                                         'id': 'fetch_stock_data',
+#                                         'func': fetch_stock_data_wrapper,
+#                                         'trigger': 'cron',
+#                                         'hour': 0,
+#                                         'minute': 0
+#                                     }
+#                                 ]
 
 class Config:
     # SECRET_KEY            =       os.getenv('SECRET_KEY')
