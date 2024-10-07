@@ -1,4 +1,5 @@
 from app.models.user_model import User
+from app.models.admin_model import Admin
 from flask import render_template
 from flask import Blueprint
 from flask import current_app
@@ -27,12 +28,20 @@ def user_dashboard():
 
 
 @db.route('/admin')
+@login_required
+@role_required(1)
 def admin_dashboard():
-    # admin = User.get_current_user()
-    admin = {
-        "first_name":"admin"
+    admin = Admin.get_current_user()
+    total_users = admin.count_total_users()
+    active_users = admin.count_active_users()
+    inactive_users = total_users - active_users
+    count = {
+        "total" : total_users,
+        "active" : active_users,
+        "inactive" : inactive_users
     }
+    print(*count)
     if admin:
-        return render_template('admin/admin_dashboard.html',brand_name=current_app.config['BRAND_NAME'],admin_=admin)
+        return render_template('admin/admin_dashboard.html',count=count,brand_name=current_app.config['BRAND_NAME'],admin_=admin)
     else:
         return redirect(url_for('auth.login'))

@@ -66,13 +66,26 @@ CREATE TABLE IF NOT EXISTS nasdaq_equity_transactions (
     transaction_id INT AUTO_INCREMENT PRIMARY KEY,   -- Unique identifier for each transaction
     user_id INT,                                     -- ID of the user performing the transaction
     stock_id INT,                                    -- ID of the stock involved in the transaction
-    transaction_type ENUM('BUY', 'SELL'),            -- Type of transaction: 'BUY' or 'SELL'
-    quantity INT,                                    -- Number of shares involved in the transaction
-    price DECIMAL(10, 4),                            -- Price per share at the time of the transaction
+    transaction_type ENUM('BUY', 'SELL') NOT NULL,            -- Type of transaction: 'BUY' or 'SELL'
+    quantity INT NOT NULL,                                    -- Number of shares involved in the transaction
+    price DECIMAL(10, 4) NOT NULL,                            -- Price per share at the time of the transaction
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Timestamp of when the transaction was made
     FOREIGN KEY (user_id) REFERENCES user(userID),   -- Foreign key linking to the user who made the transaction
     FOREIGN KEY (stock_id) REFERENCES nasdaq_listed_equities(id)  -- Foreign key linking to the stock involved in the transaction
 );
+
+CREATE TABLE IF NOT EXISTS fund_transactions (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    fund_id INT,
+    transaction_type ENUM('BUY', 'SELL') NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10,4) NOT NULL,
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(userID),
+    FOREIGN KEY (fund_id) REFERENCES funds(fund_id)
+);
+
 
 CREATE TABLE IF NOT EXISTS client_portfolio (
     portfolio_id INT AUTO_INCREMENT PRIMARY KEY,     -- Unique identifier for each portfolio entry

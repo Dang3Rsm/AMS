@@ -19,11 +19,13 @@ def create_app():
     from app.routes.auth_route import auth
     from app.routes.dashboard_route import db
     from app.routes.user_route import usr
+    from app.routes.admin_route import admin
 
     app.register_blueprint(main)
     app.register_blueprint(auth, url_prefix='/auth')
     app.register_blueprint(db, url_prefix='/dashboard')
     app.register_blueprint(usr, url_prefix='/dashboard/user')
+    app.register_blueprint(admin, url_prefix='/dashboard/admin')
 
     # Initialize the scheduler
     start_app_scheduler(app)

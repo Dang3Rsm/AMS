@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %} {{ brand_name }} {% endblock %}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body{
-            background-color: #929292;
+            background-color: #ffffff;
         }
         .bg-primary {
             --bs-bg-opacity: 1;
@@ -23,7 +24,7 @@
         }
     </style>
 </head>
-<body>
+<body class="{% if admin_.darkMode == 1 %}dark-mode{% endif %}">
 
     <!-- Navbar -->
     {% from "navbar.html" import navbar %}
@@ -37,13 +38,13 @@
             <div class="col-sm-auto col-md-3 col-lg-2" style="padding-left: 0;">
                 {{ sidebar([
                     {'href': url_for('dashboard.admin_dashboard'), 'text': 'Dashboard'},
-                    {'href': url_for('user.watchlist'), 'text': 'User Management'},
-                    {'href': url_for('user.place_order'), 'text': 'Fund Management'},
-                    {'href': url_for('user.current_orders'), 'text': 'Stock Management'},
-                    {'href': url_for('user.holdings'), 'text': 'Transactions'},
-                    {'href': url_for('user.funds'), 'text': 'Reports'},
-                    {'href': url_for('user.funds'), 'text': 'Alert & Notifications'},
-                    {'href': url_for('user.settings'), 'text': 'Settings'},
+                    {'href': url_for('admin.user_management'), 'text': 'User Management'},
+                    {'href': url_for('admin.fund_management'), 'text': 'Fund Management'},
+                    {'href': url_for('admin.stock_management'), 'text': 'Stock Management'},
+                    {'href': url_for('admin.transactions'), 'text': 'Transactions'},
+                    {'href': url_for('admin.reports'), 'text': 'Reports'},
+                    {'href': url_for('admin.notifs'), 'text': 'Alert & Notifications'},
+                    {'href': url_for('admin.settings'), 'text': 'Settings'},
                 ]) }}
             </div>
 

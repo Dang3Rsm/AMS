@@ -22,7 +22,6 @@ usr = Blueprint('user', __name__)
 @role_required(4)
 def current_orders():
     user = User.get_current_user()
-    print(f"darkMode {user.darkMode}")
     if request.method == 'POST':
         pass
     else:

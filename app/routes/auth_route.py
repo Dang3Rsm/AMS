@@ -22,18 +22,12 @@ def login():
            return redirect('auth.login')
         session['user_id'] = user_id
         session['role_id'] = role_id
-        return redirect(url_for('dashboard.user_dashboard'))  
+        if role_id == 1:
+            return redirect(url_for('dashboard.admin_dashboard'))
+        else:
+            return redirect(url_for('dashboard.user_dashboard'))
     else:
         return render_template('login.html',brand_name=current_app.config['BRAND_NAME'])
-    
-@auth.route('/admin_login', methods=['GET', 'POST'])
-def admin_login():
-    if request.method == 'POST':
-        session['user_id'] = 18
-        session['role_id'] = 4
-        return redirect(url_for('dashboard.admin_dashboard'))  
-    else:
-        return redirect(url_for('dashboard.admin_dashboard'))
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
