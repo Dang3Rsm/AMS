@@ -1,14 +1,17 @@
 {% macro sidebar(links) %}
 <nav id="sidebar" class="d-flex flex-column flex-shrink-0 p-3 bg-dark text-bg-dark position-sticky" style="top: 56px; height: calc(100vh - 56px);">
-    <ul class="nav nav-pills flex-column mb-auto">
+    <ul class="nav nav-pills flex-column mb-auto d-flex" style="height: 100%;">
         {% for link in links %}
         <li class="nav-item">
             <a class="nav-link text-white text-decoration-none" href="{{ link.href }}">{{ link.text }}</a>
         </li>
         {% endfor %}
-        <li class="nav-item">
-            <a class="nav-link text-white text-decoration-none" href="{{ url_for('auth.logout') }}">Logout</a>
-        </li>
+        <!-- Add auto margin to push the Logout button to the bottom -->
+        <li class="mt-auto nav-item logout-link">
+            <a class="nav-link text-white btn btn-danger" href="{{ url_for('auth.logout') }}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </li>  
     </ul>
 </nav>
 {% endmacro %}

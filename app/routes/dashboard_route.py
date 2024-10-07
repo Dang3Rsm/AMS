@@ -27,10 +27,11 @@ def user_dashboard():
 
 
 @db.route('/admin')
-@login_required
-@role_required(1)
 def admin_dashboard():
-    admin = User.get_current_user()
+    # admin = User.get_current_user()
+    admin = {
+        "first_name":"admin"
+    }
     if admin:
         return render_template('admin/admin_dashboard.html',brand_name=current_app.config['BRAND_NAME'],admin_=admin)
     else:

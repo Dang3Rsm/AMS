@@ -6,12 +6,12 @@
     <div class="row">
         {% for fund in mutual_funds %}
         <div class="col-md-6 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-body {% if user_.darkMode == 1 %}dark-mode{% endif %}">
+            <div class="card shadow-sm {% if user_.darkMode == 1 %}bg-dark text-white{% else %}bg-light{% endif %}">
+                <div class="card-body">
                     <h5 class="card-title">{{ fund.name }}</h5>
                     <p class="card-text">
                         <strong>Current Price:</strong> ${{ fund.current_price }}<br>
-                        <strong>Price Change:</strong> 
+                        <strong>Price Change:</strong>
                         <span class="{% if fund.change > 0 %}text-success{% else %}text-danger{% endif %}">
                             {{ fund.change }}%
                         </span>

@@ -14,6 +14,13 @@
             --bs-bg-opacity: 1;
             background-color: #fd0d87 !important;
         }
+        body.dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .container.dark-mode {
+            background-color: #1e1e1e;
+        }
     </style>
 </head>
 <body>
@@ -30,11 +37,12 @@
             <div class="col-sm-auto col-md-3 col-lg-2" style="padding-left: 0;">
                 {{ sidebar([
                     {'href': url_for('dashboard.admin_dashboard'), 'text': 'Dashboard'},
-                    {'href': url_for('user.watchlist'), 'text': 'Watchlist'},
-                    {'href': url_for('user.place_order'), 'text': 'Place Order'},
-                    {'href': url_for('user.current_orders'), 'text': 'Orders'},
-                    {'href': url_for('user.holdings'), 'text': 'Holdings'},
-                    {'href': url_for('user.funds'), 'text': 'Mutual Funds'},
+                    {'href': url_for('user.watchlist'), 'text': 'User Management'},
+                    {'href': url_for('user.place_order'), 'text': 'Fund Management'},
+                    {'href': url_for('user.current_orders'), 'text': 'Stock Management'},
+                    {'href': url_for('user.holdings'), 'text': 'Transactions'},
+                    {'href': url_for('user.funds'), 'text': 'Reports'},
+                    {'href': url_for('user.funds'), 'text': 'Alert & Notifications'},
                     {'href': url_for('user.settings'), 'text': 'Settings'},
                 ]) }}
             </div>
