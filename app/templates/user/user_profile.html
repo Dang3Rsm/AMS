@@ -1,11 +1,8 @@
 {% extends "user/user_dashboardLayout.html" %}
 
 {% block content %}
-                
-
-<body>
-    <div class="container mt-5">
-        <h2 class="text-center">Edit Profile</h2>
+<h1 class="mt-3">Edit Profile</h1>
+    <div class="container mt-3">
         <form method="POST" action="{{ url_for('user.profile') }}">
             <!-- First Name -->
             <div class="mb-3">
