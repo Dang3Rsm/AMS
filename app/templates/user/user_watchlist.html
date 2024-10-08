@@ -52,7 +52,7 @@
     <h2 class="mt-4">Mutual Funds</h2>
     <form action="{{ url_for('user.add_fund_to_watchlist') }}" method="POST" class="mb-3">
         <div class="input-group">
-            <input type="text" id="search-funds" class="form-control" name="fund_name" placeholder="Enter fund name (e.g., Vanguard 500 Index Fund)">
+            <input type="text" id="search-funds" class="form-control" name="fund_name" placeholder="Enter fund name (e.g., Vanguard 500 Index Fund)" required>
             <button class="btn btn-primary" type="submit">Add Fund</button>
         </div>
         <div id="funds-suggestions" class="list-group"></div>

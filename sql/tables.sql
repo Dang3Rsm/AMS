@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS client_portfolio (
     portfolio_id INT AUTO_INCREMENT PRIMARY KEY,     -- Unique identifier for each portfolio entry
     user_id INT,                                     -- ID of the user who owns the portfolio
     stock_id INT,                                    -- ID of the stock held in the portfolio
+    fund_id INT,
     quantity INT,                                    -- Number of shares of the stock held by the user
     average_price DECIMAL(10, 4),                    -- Average price at which the shares were acquired
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,  -- Timestamp of the last update to the portfolio entry
