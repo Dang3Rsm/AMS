@@ -99,15 +99,12 @@ class User:
             query = "SELECT * FROM watchlist WHERE user_id = %s AND stock_id = %s"
             cursor.execute(query, (self.user_id, stock["id"]))
             watched = cursor.fetchone()
-            print('test1')
             if stock and not watched:
                 stock_id = stock["id"]
                 query = "INSERT INTO watchlist (user_id, stock_id) VALUES (%s, %s)"
-                print('test2')
                 try:
                     cursor.execute(query, (self.user_id, stock_id))
                     conn.commit()
-                    print('test3')
                     return True
                 except Exception as e:
                     # rollback

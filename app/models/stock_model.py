@@ -44,7 +44,7 @@ class Stock:
         except Exception as e:
             print(f"Error: {e}")
             return None
-            
+
     @staticmethod
     def search_stocks(search_query):
         conn = get_db_connection()
@@ -93,26 +93,6 @@ class Stock:
             print(f"Error at get_symbol_by_stock_id(stock_id): {e}")
             return None
 
-    # @staticmethod
-    # def get_stock_data_by_stock_id(stock_id):
-    #     conn = get_db_connection()
-    #     try:
-    #         cursor = conn.cursor()
-    #         symbol = get_symbol_by_stock_id(stock_id)
-    #         stock = yf.Ticker(symbol)
-    #         stock_info = stock.info
-            
-    #         company_name= stock_info["longName"]
-    #         opening_price= stock_info["open"]
-    #         current_price= stock_info["currentPrice"]
-            
-    #         return stock_data
-    #         # symbol, company name, current price, change in price in percentage
-
-    #     except Exception as e:
-    #         print(f"Error at get_stockData_bu_stockID(stock_id): {e}")
-    #         return None
-    
     @staticmethod
     def fetch_stock_data():
         logging.info("fetch_stock_data is running.")
