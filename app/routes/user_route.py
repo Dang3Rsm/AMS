@@ -16,6 +16,15 @@ from ..decorators import login_required, role_required
 usr = Blueprint('user', __name__)
 
 
+@usr.route('/profile',methods=['GET', 'POST'])
+@login_required
+@role_required(4)
+def profile():
+    user = User.get_current_user()
+    if request.method == 'POST':
+        return redirect(url_for('user.profile'))
+    else:
+        return render_template('user/user_profile.html', user_=user,brand_name=current_app.config['BRAND_NAME'])
 
 @usr.route('/current_orders',methods=['GET', 'POST'])
 @login_required
@@ -143,26 +152,26 @@ def watchlist():
     if request.method == 'POST':
         return redirect(url_for('user.watchlist'))
     else:
-        stocks_data = [
-            {"symbol": "AAPL", "company_name": "Apple Inc.", "current_price": 145.09, "change": 1.5},
-            {"symbol": "TSLA", "company_name": "Tesla Inc.", "current_price": 700.12, "change": -0.8},
-            {"symbol": "AMZN", "company_name": "Amazon.com Inc.", "current_price": 3342.88, "change": 0.9},
-            {"symbol": "GOOGL", "company_name": "Alphabet Inc.", "current_price": 2800.22, "change": 1.2},
-            {"symbol": "MSFT", "company_name": "Microsoft Corporation", "current_price": 299.87, "change": 2.3},
-            {"symbol": "NFLX", "company_name": "Netflix Inc.", "current_price": 589.00, "change": -1.7},
-            {"symbol": "FB", "company_name": "Meta Platforms Inc.", "current_price": 351.64, "change": 0.5},
-            {"symbol": "NVDA", "company_name": "NVIDIA Corporation", "current_price": 195.80, "change": 3.1},
-            {"symbol": "DIS", "company_name": "The Walt Disney Company", "current_price": 177.12, "change": -0.3},
-            {"symbol": "BABA", "company_name": "Alibaba Group Holding Ltd.", "current_price": 210.50, "change": -1.0},
-            {"symbol": "AMD", "company_name": "Advanced Micro Devices, Inc.", "current_price": 120.56, "change": 1.7},
-            {"symbol": "SPOT", "company_name": "Spotify Technology S.A.", "current_price": 248.92, "change": -0.4}
-        ]
+        # stocks_data = [
+        #     {"symbol": "AAPL", "company_name": "Apple Inc.", "current_price": 145.09, "change": 1.5},
+        #     {"symbol": "TSLA", "company_name": "Tesla Inc.", "current_price": 700.12, "change": -0.8},
+        #     {"symbol": "AMZN", "company_name": "Amazon.com Inc.", "current_price": 3342.88, "change": 0.9},
+        #     {"symbol": "GOOGL", "company_name": "Alphabet Inc.", "current_price": 2800.22, "change": 1.2},
+        #     {"symbol": "MSFT", "company_name": "Microsoft Corporation", "current_price": 299.87, "change": 2.3},
+        #     {"symbol": "NFLX", "company_name": "Netflix Inc.", "current_price": 589.00, "change": -1.7},
+        #     {"symbol": "FB", "company_name": "Meta Platforms Inc.", "current_price": 351.64, "change": 0.5},
+        #     {"symbol": "NVDA", "company_name": "NVIDIA Corporation", "current_price": 195.80, "change": 3.1},
+        #     {"symbol": "DIS", "company_name": "The Walt Disney Company", "current_price": 177.12, "change": -0.3},
+        #     {"symbol": "BABA", "company_name": "Alibaba Group Holding Ltd.", "current_price": 210.50, "change": -1.0},
+        #     {"symbol": "AMD", "company_name": "Advanced Micro Devices, Inc.", "current_price": 120.56, "change": 1.7},
+        #     {"symbol": "SPOT", "company_name": "Spotify Technology S.A.", "current_price": 248.92, "change": -0.4}
+        # ]
 
-
-        funds_data = [
-            {"fund_id": 1, "fund_name": "Vanguard 500 Index Fund", "nav": 350.45, "change": 0.4},
-            {"fund_id": 2, "fund_name": "Fidelity Contrafund", "nav": 104.23, "change": -0.2}
-        ]
+        # funds_data = [
+        #     {"fund_id": 1, "fund_name": "Vanguard 500 Index Fund", "nav": 350.45, "change": 0.4},
+        #     {"fund_id": 2, "fund_name": "Fidelity Contrafund", "nav": 104.23, "change": -0.2}
+        # ]
+        stocks_data, funds_data = user.getWatchlist()
         return render_template('user/user_watchlist.html',user_=user,watchlist={"stocks": stocks_data, "funds": funds_data},brand_name=current_app.config['BRAND_NAME'])
 
 @usr.route('/remove_from_watchlist/stock/<string:stock_symbol>', methods=['POST'])
@@ -201,6 +210,16 @@ def add_stock_to_watchlist():
     #     flash(f'{stock_symbol} added to watchlist!', 'success')
     # else:
     #     flash(f'Stock {stock_symbol} not found.', 'danger')
+    if not stock_symbol:
+        flash('Please enter a valid stock symbol.', 'danger')
+        return redirect(url_for('user.watchlist'))
+    try:
+        stock_symbol = stock_symbol.upper()
+        user = User.get_current_user()
+        user.addStockToWatchlist(stock_symbol)
+        flash(f'Stock {stock_symbol} added to watchlist!', 'success')
+    except Exception as e:
+        flash(f'Error adding stock {stock_symbol} to watchlist.', 'danger')
     return redirect(url_for('user.watchlist'))
 
 @usr.route('/add_fund_to_watchlist', methods=['POST'])
@@ -216,6 +235,15 @@ def add_fund_to_watchlist():
     #     flash(f'{fund_name} added to watchlist!', 'success')
     # else:
     #     flash(f'Fund {fund_name} not found.', 'danger')
+    if not fund_name:
+        flash('Please enter a valid fund name.', 'danger')
+        return redirect(url_for('user.watchlist'))
+    try:
+        user = User.get_current_user()
+        user.addFundToWatchlist(fund_name)
+        flash(f'Fund {fund_name} added to watchlist!', 'success')
+    except Exception as e:
+        flash(f'Error adding fund {fund_name} to watchlist.', 'danger')
     return redirect(url_for('user.watchlist'))
 
 

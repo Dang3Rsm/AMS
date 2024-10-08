@@ -67,6 +67,63 @@ class User:
         except Exception as e:
             print(f"Error: {e}")
             return None
+
+    def getWatchlist(self):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = "SELECT * FROM watchlist WHERE user_id = %s"
+            cursor.execute(query, (self.user_id,))
+            watchlist = cursor.fetchall()
+            watchlist_stocks = []
+            watchlist_funds = []
+            for item in watchlist:
+                if item["stock_id"]:
+                    watchlist_stocks.append(item)
+                elif item["fund_id"]:
+                    watchlist_funds.append(item)
+            return watchlist_stocks, watchlist_funds
+        except Exception as e:
+            print(f"Error at getWatchlist(): {e}")
+            return None
+
+    def addStockToWatchlist(self, stock_symbol):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = "SELECT stock_id FROM stock WHERE stock_symbol = %s"
+            cursor.execute(query, (stock_symbol,))
+            stock = cursor.fetchone()
+            if stock:
+                stock_id = stock["stock_id"]
+                query = "INSERT INTO watchlist (user_id, stock_id) VALUES (%s, %s)"
+                cursor.execute(query, (self.user_id, stock_id))
+                conn.commit()
+                return True
+            else:
+                return False
+        except Exception as e:
+            print(f"Error at addStockToWatchlist(): {e}")
+            return False
+    
+    def addFundToWatchlist(self, fund_name):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = "SELECT fund_id FROM fund WHERE fund_name = %s"
+            cursor.execute(query, (fund_name,))
+            fund = cursor.fetchone()
+            if fund:
+                fund_id = fund["fund_id"]
+                query = "INSERT INTO watchlist (user_id, fund_id) VALUES (%s, %s)"
+                cursor.execute(query, (self.user_id, fund_id))
+                conn.commit()
+                return True
+            else:
+                return False
+        except Exception as e:
+            print(f"Error at addFundToWatchlist(): {e}")
+            return False
         
     def register_user_created_by(self,user_id):
         conn = get_db_connection()
