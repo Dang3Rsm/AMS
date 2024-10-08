@@ -42,3 +42,26 @@ class Fund:
         except Exception as e:
             print(f"Error: {e}")
             return None
+    
+    @staticmethod
+    def search_funds(search_query):
+        # Prepare the SQL query with placeholders
+        conn = get_db_connection()
+        sql_query = """
+        SELECT * FROM funds 
+        WHERE LOWER(fund_name) LIKE LOWER(%s) 
+        """
+        
+        # Format the query input with wildcards
+        query_input = f'%{search_query}%'  # Escape the user input
+        try:
+            with conn.cursor() as cursor:
+                # Execute the query with the input parameters
+                cursor.execute(sql_query, (query_input, ))
+                funds = cursor.fetchall()  # Fetch all matching records
+                return funds  # Return the results
+        except Exception as e:
+            print(f"Error during database operation: {e}")
+            return []  # Return an empty list on error
+        finally:
+            conn.close()  # Ensure the connection is closed

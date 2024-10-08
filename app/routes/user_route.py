@@ -1,4 +1,6 @@
 from app.models.user_model import User
+from app.models.stock_model import Stock
+from app.models.fund_model import Fund
 from flask import render_template
 from flask import Blueprint
 from flask import current_app
@@ -7,6 +9,7 @@ from flask import redirect
 from flask import url_for
 from flask import flash
 from flask import session
+from flask import jsonify
 from ..decorators import login_required, role_required
 
 usr = Blueprint('user', __name__)
@@ -120,6 +123,27 @@ def remove_from_watchlist_fund(fund_id):
     flash(f'Fund with ID {fund_id} removed from your watchlist.', 'success')
     return redirect(url_for('watchlist'))
 
+@usr.route('/search_stocks', methods=['GET'])
+@login_required
+@role_required(4)
+def search_stocks():
+    query = request.args.get('query')
+    if query:
+        # Fetch stocks from our database
+        stocks = Stock.search_stocks(query)  # Implement this in your StockModel
+        return jsonify(stocks)  # Return the list of stocks in JSON format
+    return jsonify([])  # Return an empty list if no query
+
+@usr.route('/search_funds', methods=['GET'])
+@login_required
+@role_required(4)
+def search_funds():
+    query = request.args.get('query')
+    if query:
+        # Fetch stocks from our database
+        funds = Fund.search_funds(query)  # Implement this in your StockModel
+        return jsonify(funds)  # Return the list of stocks in JSON format
+    return jsonify([])  # Return an empty list if no query
 
 @usr.route('/add_stock_to_watchlist', methods=['POST'])
 @login_required

@@ -46,6 +46,26 @@ class Stock:
             return None
 
     @staticmethod
+    def search_stocks(search_query):
+        conn = get_db_connection()
+        sql_query = """
+        SELECT * FROM nasdaq_listed_equities 
+        WHERE LOWER(symbol) LIKE LOWER(%s) OR LOWER(name) LIKE LOWER(%s)
+        """
+        
+        query_input = f'%{search_query}%'  # Escape the user input
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute(sql_query, (query_input, query_input))
+                stocks = cursor.fetchall()  
+                return stocks  
+        except Exception as e:
+            print(f"Error during database operation: {e}")
+            return []  
+        finally:
+            conn.close()  
+
+    @staticmethod
     def get_stockID_by_symbol(symbol): 
         conn = get_db_connection()
         try:
@@ -59,7 +79,20 @@ class Stock:
             print(f"Error at get_stockID_by_symbol(symbol): {e}")
             return None
 
-    
+    @staticmethod
+    def get_symbol_by_stock_id(stock_id):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = "SELECT symbol FROM nasdaq_listed_equities WHERE id = %s"
+            cursor.execute(query, (stock_id,))
+            stock = cursor.fetchone()
+            conn.close()
+            return stock['symbol'] if stock else None
+        except Exception as e:
+            print(f"Error at get_symbol_by_stock_id(stock_id): {e}")
+            return None
+
     @staticmethod
     def fetch_stock_data():
         logging.info("fetch_stock_data is running.")
