@@ -1,13 +1,33 @@
 {% extends "user/user_dashboardLayout.html" %}
 
 {% block content %}
+<style>
+    /* Styles for the suggestion box */
+    .suggestion-box {
+        border: 1px solid #ccc;
+        max-height: 200px;
+        overflow-y: auto;
+        position: absolute;
+        z-index: 1000;
+        background: white;
+        width: 100%;
+    }
+    .suggestion-item {
+        padding: 10px;
+        cursor: pointer;
+    }
+    .suggestion-item:hover {
+        background-color: #f0f0f0;
+    }
+</style>
     <h1 class="mt-3">Watchlist</h1>
 
     <!-- Section for Stocks -->
     <h2 class="mt-4">Stocks</h2>
     <form action="{{ url_for('user.add_stock_to_watchlist') }}" method="POST" class="mb-3">
         <div class="input-group">
-            <input type="text" class="form-control" name="stock_symbol" placeholder="Enter stock symbol (e.g., AAPL)">
+            <input type="text" id="stock-search" class="form-control" name="stock_symbol" placeholder="Enter stock symbol (e.g., AAPL)">
+            <div id="suggestions" class="suggestion-box"></div>
             <button class="btn btn-primary" type="submit">Add Stock</button>
         </div>
     </form>
@@ -86,4 +106,30 @@
     {% if watchlist.funds|length == 0 %}
         <p class="text-center">No mutual funds in your watchlist.</p>
     {% endif %}
+
+    <script>
+        document.getElementById('stock-search').addEventListener('input', function() {
+            const query = this.value;
+            if (query.length > 2) {  // Start searching after 3 characters
+                fetch(`/search_stock?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const suggestions = document.getElementById('suggestions');
+                        suggestions.innerHTML = '';  // Clear previous suggestions
+                        data.forEach(stock => {
+                            const div = document.createElement('div');
+                            div.className = 'suggestion-item';
+                            div.innerText = stock.name;  // Assuming 'name' is a field in your stock data
+                            div.onclick = () => {
+                                document.getElementById('stock-search').value = stock.name;  // Populate input
+                                suggestions.innerHTML = '';  // Clear suggestions
+                            };
+                            suggestions.appendChild(div);
+                        });
+                    });
+            } else {
+                document.getElementById('suggestions').innerHTML = '';  // Clear suggestions if input is less than 3 characters
+            }
+        });
+    </script>
 {% endblock %}
