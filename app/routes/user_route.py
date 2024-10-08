@@ -65,69 +65,13 @@ def holdings():
     if request.method == 'POST':
         return redirect(url_for('user.holdings'))
     else:
-        holdings = [
-                {
-                    "exchange": "NSE",
-                    "tradingSymbol": "RELIANCE",
-                    "totalQty": 50,
-                    "avgCostPrice": 2000.00
-                },
-                {
-                    "exchange": "NSE",
-                    "tradingSymbol": "TCS",
-                    "totalQty": 30,
-                    "avgCostPrice": 3500.50
-                },
-                {
-                    "exchange": "BSE",
-                    "tradingSymbol": "INFY",
-                    "totalQty": 25,
-                    "avgCostPrice": 1500.75
-                },
-                {
-                    "exchange": "NSE",
-                    "tradingSymbol": "HDFC",
-                    "totalQty": 40,
-                    "avgCostPrice": 2900.00
-                },
-                {
-                    "exchange": "NSE",
-                    "tradingSymbol": "HCLTECH",
-                    "totalQty": 35,
-                    "avgCostPrice": 800.00
-                },
-                {
-                    "exchange": "BSE",
-                    "tradingSymbol": "WIPRO",
-                    "totalQty": 60,
-                    "avgCostPrice": 650.25
-                },
-                {
-                    "exchange": "NSE",
-                    "tradingSymbol": "AXISBANK",
-                    "totalQty": 20,
-                    "avgCostPrice": 850.50
-                },
-                {
-                    "exchange": "BSE",
-                    "tradingSymbol": "ICICIBANK",
-                    "totalQty": 15,
-                    "avgCostPrice": 780.00
-                },
-                {
-                    "exchange": "NSE",
-                    "tradingSymbol": "TATAMOTORS",
-                    "totalQty": 45,
-                    "avgCostPrice": 500.75
-                },
-                {
-                    "exchange": "BSE",
-                    "tradingSymbol": "MARUTI",
-                    "totalQty": 10,
-                    "avgCostPrice": 7200.00
-                }
-            ]
-        return render_template('user/user_holdings.html',user_=user,holdings=holdings,brand_name=current_app.config['BRAND_NAME'])
+        stock_holdings = user.getStockHoldings()
+        fund_holdings = user.getFundHoldings()
+        if not stock_holdings:
+            stock_holdings = []
+        if not fund_holdings:
+            fund_holdings = []
+        return render_template('user/user_holdings.html',user_=user,holdings={"stocks": stock_holdings, "mutualFunds": fund_holdings},brand_name=current_app.config['BRAND_NAME'])
     
 
 @usr.route('/mutual_funds',methods=['GET', 'POST'])
@@ -152,26 +96,9 @@ def watchlist():
     if request.method == 'POST':
         return redirect(url_for('user.watchlist'))
     else:
-        # stocks_data = [
-        #     {"symbol": "AAPL", "company_name": "Apple Inc.", "current_price": 145.09, "change": 1.5},
-        #     {"symbol": "TSLA", "company_name": "Tesla Inc.", "current_price": 700.12, "change": -0.8},
-        #     {"symbol": "AMZN", "company_name": "Amazon.com Inc.", "current_price": 3342.88, "change": 0.9},
-        #     {"symbol": "GOOGL", "company_name": "Alphabet Inc.", "current_price": 2800.22, "change": 1.2},
-        #     {"symbol": "MSFT", "company_name": "Microsoft Corporation", "current_price": 299.87, "change": 2.3},
-        #     {"symbol": "NFLX", "company_name": "Netflix Inc.", "current_price": 589.00, "change": -1.7},
-        #     {"symbol": "FB", "company_name": "Meta Platforms Inc.", "current_price": 351.64, "change": 0.5},
-        #     {"symbol": "NVDA", "company_name": "NVIDIA Corporation", "current_price": 195.80, "change": 3.1},
-        #     {"symbol": "DIS", "company_name": "The Walt Disney Company", "current_price": 177.12, "change": -0.3},
-        #     {"symbol": "BABA", "company_name": "Alibaba Group Holding Ltd.", "current_price": 210.50, "change": -1.0},
-        #     {"symbol": "AMD", "company_name": "Advanced Micro Devices, Inc.", "current_price": 120.56, "change": 1.7},
-        #     {"symbol": "SPOT", "company_name": "Spotify Technology S.A.", "current_price": 248.92, "change": -0.4}
-        # ]
-
-        # funds_data = [
-        #     {"fund_id": 1, "fund_name": "Vanguard 500 Index Fund", "nav": 350.45, "change": 0.4},
-        #     {"fund_id": 2, "fund_name": "Fidelity Contrafund", "nav": 104.23, "change": -0.2}
-        # ]
         stocks_data, funds_data = user.getWatchlist()
+        stocks_data = []
+        funds_data = []
         return render_template('user/user_watchlist.html',user_=user,watchlist={"stocks": stocks_data, "funds": funds_data},brand_name=current_app.config['BRAND_NAME'])
 
 @usr.route('/remove_from_watchlist/stock/<string:stock_symbol>', methods=['POST'])

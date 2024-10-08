@@ -212,6 +212,141 @@ class User:
             print(f"Error at get_all_funds(): {e}")
             return None
 
+    # isko debug krna padega, bohot problems hain by @dang3r
+    def getStockHoldings(self):
+        """Retrieve stock holdings for the user, including current price, PnL, and change."""
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+
+            query = """
+                SELECT 
+                    e.id AS stock_id,
+                    e.symbol AS symbol,
+                    e.name AS name,
+                    p.portfolio_id AS portfolio_id,
+                    p.user_id AS user_id,
+                    p.quantity AS quantity,
+                    p.average_price AS average_price,
+                    ph.current_price AS current_price
+                FROM 
+                    client_portfolio p
+                JOIN 
+                    nasdaq_listed_equities e ON p.stock_id = e.id
+                JOIN 
+                    (SELECT 
+                        stock_id, 
+                        close_price AS current_price 
+                    FROM 
+                        equity_price_history 
+                    LIMIT 1) ph ON p.stock_id = ph.stock_id
+                WHERE 
+                    p.user_id = %s;
+            """
+            cursor.execute(query, (self.user_id,))
+            stocks = cursor.fetchall()
+            pnl = None
+            change = None
+            stock_list = []
+            for stock in stocks:
+                current_price = stock["current_price"]
+                average_price = stock["average_price"]
+                if current_price is not None and average_price is not None:
+                    pnl = current_price - average_price
+                    pnl = round(pnl, 2)
+                if pnl is not None and average_price != 0:
+                    change = pnl / stock["average_price"]
+                    change *= 100
+                    change = round(change, 2)
+
+                stock_list.append(
+                    {
+                        "stock_id": stock['stock_id'],
+                        "symbol": stock['symbol'],
+                        "name": stock['name'],
+                        "portfolio_id": stock['portfolio_id'],
+                        "user_id": stock['user_id'],
+                        "quantity": stock['quantity'],
+                        "average_price": stock['average_price'],
+                        "current_price": stock['current_price'],
+                        "pnl": pnl,
+                        "change": change
+                    } 
+                )
+            return stock_list
+        except Exception as e:
+            print(f"Error at getStockHoldings(): {e}")
+            return None
+
+    # isko debug krna padega, bohot problems hain by @dang3r
+    def getFundHoldings(self):
+        """Retrieve mutual fund holdings for the user, including current price, PnL, and change."""
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+
+            query = """
+                SELECT 
+                    f.fund_id,
+                    f.fund_name,
+                    f.fund_theme,
+                    p.portfolio_id,
+                    p.user_id,
+                    p.quantity,
+                    p.average_price,
+                    ph.current_price
+                FROM 
+                    client_portfolio p
+                JOIN 
+                    funds f ON p.fund_id = f.fund_id
+                JOIN 
+                    (SELECT 
+                        fund_id, 
+                        price AS current_price 
+                    FROM 
+                        fund_price_history 
+                    ORDER BY 
+                        date DESC 
+                    LIMIT 1) ph ON p.fund_id = ph.fund_id
+                WHERE 
+                    p.user_id = %s;
+            """
+            cursor.execute(query, (self.user_id,))
+            funds = cursor.fetchall()
+
+            fund_list = []
+            for fund in funds:
+                current_price = fund["current_price"]
+                average_price = fund["average_price"]
+                pnl = None
+                change = None
+
+                if current_price is not None and average_price is not None:
+                    pnl = (current_price - average_price) * fund["quantity"]  # Total PnL
+                    pnl = round(pnl, 2)
+
+                    if average_price != 0:
+                        change = (current_price - average_price) / average_price * 100  # Percentage change
+                        change = round(change, 2)
+
+                fund_list.append(
+                    {
+                        "fund_id": fund['fund_id'],
+                        "fund_name": fund['fund_name'],
+                        "fund_theme": fund['fund_theme'],
+                        "portfolio_id": fund['portfolio_id'],
+                        "user_id": fund['user_id'],
+                        "quantity": fund['quantity'],
+                        "average_price": fund['average_price'],
+                        "current_price": fund['current_price'],
+                        "pnl": pnl,
+                        "change": change
+                    }
+                )
+            return fund_list
+        except Exception as e:
+            print(f"Error at getFundHoldings(): {e}")
+            return None
         
     @staticmethod
     def authenticate(email: str, password: str) -> tuple:
@@ -294,7 +429,6 @@ class User:
             print(f"Error: {e}")
             return None
 
-
     @staticmethod
     def get_roles():
         conn = get_db_connection()
@@ -322,7 +456,6 @@ class User:
             print(f"Error: {e}")
             return None
         
-
     @staticmethod
     def get_last_userID():
         conn = get_db_connection()
@@ -338,7 +471,6 @@ class User:
             print(f"Error at get_last_userID(): {e}")
             return None
         
-
     @staticmethod
     def get_user_darkMode(user_id = None):
         conn = get_db_connection()
