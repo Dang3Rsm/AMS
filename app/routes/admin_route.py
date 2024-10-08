@@ -8,10 +8,8 @@ from flask import redirect
 from flask import url_for
 from flask import flash
 from flask import session
+from ..security import generate_hash_password
 from ..decorators import login_required, role_required
-# @app.route('/')
-# def index():
-    # return render_template('index.html')
 
 admin = Blueprint('admin', __name__)
 
@@ -21,23 +19,32 @@ admin = Blueprint('admin', __name__)
 def user_management():
     admin = Admin.get_current_user()
     users = admin.get_all_users()
+    roles = admin.get_roles()
     if not users:
         users = []
-    return render_template('admin/admin_user_management.html', admin_=admin, users=users, brand_name=current_app.config['BRAND_NAME'])
+    if not roles:
+        roles = []
+    return render_template('admin/admin_user_management.html', admin_=admin, users=users, roles=roles, brand_name=current_app.config['BRAND_NAME'])
 
 @admin.route('/fund_management',methods=['GET', 'POST'])
 @login_required
 @role_required(1)
 def fund_management():
     admin = Admin.get_current_user()
-    return render_template('admin/admin_fund_management.html', admin_=admin, brand_name=current_app.config['BRAND_NAME'])
+    funds = admin.get_all_funds()
+    if not funds:
+        funds = []
+    return render_template('admin/admin_fund_management.html', admin_=admin, funds=funds, brand_name=current_app.config['BRAND_NAME'])
 
 @admin.route('/stock_management',methods=['GET', 'POST'])
 @login_required
 @role_required(1)
 def stock_management():
     admin = Admin.get_current_user()
-    return render_template('admin/admin_stock_management.html', admin_=admin, brand_name=current_app.config['BRAND_NAME'])
+    stocks = admin.get_all_stocks()
+    if not stocks:
+        stocks = []
+    return render_template('admin/admin_stock_management.html', admin_=admin, stocks=stocks, brand_name=current_app.config['BRAND_NAME'])
 
 @admin.route('/transactions',methods=['GET', 'POST'])
 @login_required
@@ -90,3 +97,53 @@ def update_dark_mode():
 def settings():
     admin = Admin.get_current_user()
     return render_template('admin/admin_settings.html', admin_=admin, brand_name=current_app.config['BRAND_NAME'])
+
+@admin.route('/toggle_activate_user/<int:user_id>',methods=['POST'])
+@login_required
+@role_required(1)
+def toggle_activate_user(user_id):
+    admin = Admin.get_current_user()
+    admin.toggle_activate_user(user_id)
+    return redirect(url_for('admin.user_management'))
+    
+
+@admin.route('/add_new_user',methods=['POST'])
+@login_required
+@role_required(1)
+def add_new_user():
+    admin = Admin.get_current_user()
+    if request.method == 'POST':
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        email = request.form.get('email')
+        phoneno = request.form.get('phone_number')
+        dob = request.form.get('dob')
+        street = request.form.get('street_address')
+        city = request.form.get('city')
+        state = request.form.get('state')
+        pincode = request.form.get('pincode')
+        country = request.form.get('country')
+        password = request.form.get('password')
+        role_id = request.form.get('role')
+        hashed_password = generate_hash_password(password)
+        user = User(
+           first_name= first_name,
+           last_name= last_name,
+           email= email,
+           phoneno= phoneno,
+           password= hashed_password,
+           role_id= role_id,
+           dob= dob,
+           street= street,
+           city= city,
+           state= state,
+           pincode= pincode,
+           country= country,
+           created_by= admin.user_id
+           )
+        new_user_id = user.register_user_created_by(admin.user_id)
+        if new_user_id:
+           print(f"USER CREATED {new_user_id}")
+        else:
+           print("FAILED USER CREATION")
+        return redirect(url_for('admin.user_management'))

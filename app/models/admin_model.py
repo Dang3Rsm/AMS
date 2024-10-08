@@ -40,7 +40,6 @@ class Admin(User):
             print(f"Error fetching count_active_users: {e}")
             return -1
         
-    # Admin-specific methods
     def get_all_users(self):
         """Admin can get all users."""
         conn = get_db_connection()
@@ -58,25 +57,67 @@ class Admin(User):
             print(f"Error fetching all users: {e}")
             return None
 
-    def deactivate_user(self, user_id):
-        """Admin can deactivate a user account."""
+
+    def get_all_funds(self):
+        """Admin can get all funds."""
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "UPDATE user SET is_active = 0 WHERE userID = %s"
-            cursor.execute(query, (user_id,))
-            conn.commit()
-            return True
+            query = """
+                SELECT funds.*, user.first_name, user.last_name 
+                FROM funds
+                JOIN user ON funds.user_id = user.userID;
+            """
+            cursor.execute(query)
+            funds = cursor.fetchall()
+            return funds
         except Exception as e:
-            print(f"Error deactivating user {user_id}: {e}")
+            print(f"Error fetching all funds: {e}")
+            return None
+
+    def get_all_stocks(self):
+        """Admin can get all stocks."""
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                SELECT * FROM nasdaq_listed_equities;
+            """
+            cursor.execute(query)
+            stocks = cursor.fetchall()
+            return stocks
+        except Exception as e:
+            print(f"Error fetching all stocks: {e}")
+            return None
+
+    def toggle_activate_user(self, user_id):
+        """Admin can toggle is_active of a user account."""
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            select_query = "SELECT is_active FROM user WHERE userID = %s"
+            cursor.execute(select_query, (user_id,))
+            result = cursor.fetchone()
+            if result is not None:
+                current_status = result['is_active']
+                new_status = 0 if current_status else 1
+                update_query = "UPDATE user SET is_active = %s WHERE userID = %s"
+                cursor.execute(update_query, (new_status, user_id))
+                conn.commit()
+                return True
+            else:
+                print(f"No user found with userID {user_id}")
+                return False
+        except Exception as e:
+            print(f"Error toggling user status for userID {user_id}: {e}")
             return False
+
 
     def promote_to_admin(self, user_id):
         """Admin can promote a user to an admin role."""
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            # Assuming '1' is the role_id for Admin
             query = "UPDATE user SET role_id = 1 WHERE userID = %s"
             cursor.execute(query, (user_id,))
             conn.commit()
@@ -103,7 +144,12 @@ class Admin(User):
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT * FROM nasdaq_equity_transactions"
+            query = """
+                SELECT nasdaq_equity_transactions.*, user.userID, user.first_name, nasdaq_listed_equities.symbol
+                FROM nasdaq_equity_transactions
+                LEFT JOIN user ON user.userID = nasdaq_equity_transactions.user_id
+                LEFT JOIN nasdaq_listed_equities ON nasdaq_listed_equities.id = nasdaq_equity_transactions.stock_id
+            """
             cursor.execute(query)
             equity_transactions = cursor.fetchall()
             return equity_transactions
@@ -116,7 +162,12 @@ class Admin(User):
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT * FROM fund_transactions"
+            query = """
+                SELECT fund_transactions.*, user.userID, user.first_name, funds.fund_name
+                FROM fund_transactions
+                LEFT JOIN user ON user.userID = fund_transactions.user_id
+                LEFT JOIN funds ON funds.fund_id = fund_transactions.fund_id
+            """
             cursor.execute(query)
             fund_transactions = cursor.fetchall()
             return fund_transactions

@@ -124,7 +124,23 @@ class User:
         except Exception as e:
             print(f"Error at addFundToWatchlist(): {e}")
             return False
-
+        
+    def register_user_created_by(self,user_id):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                INSERT INTO user (first_name, last_name, email, password, role_id, phone_number, dob, street_address, city, state, pincode, country, created_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (self.first_name, self.last_name, self.email, self.password, self.role_id, self.phoneno, self.dob, self.street, self.city, self.state, self.pincode, self.country, user_id))
+            conn.commit()
+            last_user_id = User.get_last_userID()
+            return last_user_id
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+        
     def getOrders(self):
         conn = get_db_connection()
         try:
