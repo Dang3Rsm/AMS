@@ -6,7 +6,7 @@
         
         <!-- Add Fund Button -->
         <div class="mb-3">
-            <a href="#" class="btn btn-primary">
+            <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFundModal">
                 <i class="fas fa-chart-line"></i> Add New Fund
             </a>
         </div>
@@ -88,7 +88,43 @@
         {% if funds|length == 0 %}
             <p class="text-center">No funds found.</p>
         {% endif %}
-    </div>
+        <!-- Add Fund Modal -->
+        <div class="modal fade" id="addFundModal" tabindex="-1" aria-labelledby="addFundModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content {% if admin_.darkMode == 1 %}bg-dark text-white{% endif %}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addFundModalLabel">Add New Fund</h5>
+                        <button type="button" class="btn-close {% if admin_.darkMode == 1 %}btn-close-white{% endif %}" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ url_for('admin.add_new_fund') }}", method='POST'>
+                            <div class="mb-3">
+                                <label for="fundName" class="form-label">Fund Name</label>
+                                <input type="text" class="form-control" id="fundName" name="fund_Name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="fundTheme" class="form-label">Fund Theme</label>
+                                <input type="text" class="form-control" id="fundTheme" name="fund_theme">
+                            </div>
+                            <div class="mb-3">
+                                <label for="strategy" class="form-label">Strategy</label>
+                                <textarea class="form-control" id="strategy" name="strategy"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fundsector" class="form-label">Sector</label>
+                                <input type="text" class="form-control" id="fundSector" name="fund_sector" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Add Fund</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
 
 <!-- Populate the Modal -->
 <script>

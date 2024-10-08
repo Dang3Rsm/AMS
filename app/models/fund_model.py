@@ -21,13 +21,17 @@ from app.db import get_db_connection
 
 
 class Fund:
-    def __init__(self, fund_id, symbol=None, name=None, country=None, sector=None, industry=None):
-        self.fund_id = fund_id
-        self.symbol = symbol
-        self.name = name
+    def __init__(self, fund_id=None, symbol=None, fund_name=None,fund_theme=None, country=None, fund_sector=None, industry=None,strategy=None,Fund_manager=None):
+        self.fund_id=fund_id
+        self.symbol=symbol
+        self.fund_theme=fund_theme
+        self.fund_name = fund_name
         self.country = country
-        self.sector = sector
+        self.fund_sector = fund_sector
         self.industry = industry
+        self.strategy=strategy
+        self.Fund_manager=Fund_manager
+
     
     @staticmethod
     def get_fund_by_id(fund_id):
@@ -41,4 +45,32 @@ class Fund:
             return fund
         except Exception as e:
             print(f"Error: {e}")
+            return None
+        
+    def add_fund(self):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                INSERT INTO funds (fund_name, fund_theme, fund_sector, strategy, created_by)
+                VALUES (%s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (self.fund_name, self.fund_theme, self.fund_sector, self.strategy, self.created_by))
+            conn.commit()
+            last_fund_id = self.get_last_fund_id()
+            return last_fund_id
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+
+    @staticmethod
+    def get_last_fund_id():
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            last_id = cursor.fetchone()[0]
+            return last_id
+        except Exception as e:
+            print(f"Error fetching last fund ID: {e}")
             return None

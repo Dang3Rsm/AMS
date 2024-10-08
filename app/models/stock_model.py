@@ -124,3 +124,30 @@ class Stock:
 
             cursor.close()
             conn.close()
+    def create_stock(self):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                INSERT INTO nasdaq_listed_equities (stock_symbol, stock_name, country, sector, industry, created_by)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (self.stock_symbol, self.stock_name, self.country, self.sector, self.industry, self.created_by))
+            conn.commit()
+            last_stock_id = self.get_last_stock_id()
+            return last_stock_id
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+
+    @staticmethod
+    def get_last_stock_id():
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT LAST_INSERT_ID()")
+            last_id = cursor.fetchone()[0]
+            return last_id
+        except Exception as e:
+            print(f"Error fetching last stock ID: {e}")
+            return None

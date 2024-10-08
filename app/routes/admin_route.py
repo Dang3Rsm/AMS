@@ -1,5 +1,7 @@
 from app.models.user_model import User
 from app.models.admin_model import Admin
+from app.models.fund_model import Fund
+from app.models.stock_model import Stock
 from flask import render_template
 from flask import Blueprint
 from flask import current_app
@@ -147,3 +149,62 @@ def add_new_user():
         else:
            print("FAILED USER CREATION")
         return redirect(url_for('admin.user_management'))
+    
+@admin.route('/add_new_fund', methods=['POST'])
+@login_required
+@role_required(1)
+def add_new_fund():
+    admin = Admin.get_current_user()
+    if request.method == 'POST':
+        fund_name = request.form.get('fundName')
+        fund_theme = request.form.get('fundTheme')
+        fund_sector = request.form.get('fundSector')
+        strategy = request.form.get('strategy')
+        
+        # Create a new fund instance
+        fund = Fund(
+            fund_name=fund_name,
+            fund_theme=fund_theme,
+            fund_sector=fund_sector,
+            strategy=strategy,
+            Fund_manager=admin.user_id  # Tracking who created the fund
+        )
+        
+        new_fund_id = fund.add_fund()  # Make sure you have this method in your Fund model
+        if new_fund_id:
+            print(f"FUND CREATED {new_fund_id}")
+        else:
+            print("FAILED FUND CREATION")
+        
+        return redirect(url_for('admin.fund_management'))  # Change to the correct route for fund management
+
+
+@admin.route('/add_new_stock', methods=['POST'])
+@login_required
+@role_required(1)
+def add_new_stock():
+    admin = Admin.get_current_user()
+    if request.method == 'POST':
+        stock_symbol = request.form.get('stocksymbol')
+        stock_name = request.form.get('StockName')
+        country = request.form.get('stockcountry')
+        sector = request.form.get('stocksector')
+        industry = request.form.get('stockindustry')
+        
+        # Create a new stock instance
+        stock = Stock(
+            symbol=stock_symbol,
+            name=stock_name,
+            country=country,
+            sector=sector,
+            industry=industry
+        )
+        
+        new_stock_id = stock.create_stock() 
+        if new_stock_id:
+            print(f"STOCK CREATED {new_stock_id}")
+        else:
+            print("FAILED STOCK CREATION")
+        
+        return redirect(url_for('admin.stock_management')) 
+
