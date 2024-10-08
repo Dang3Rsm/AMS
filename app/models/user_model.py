@@ -1,4 +1,5 @@
 from app.db import get_db_connection
+from app.models.stock_model import Stock
 from flask import session
 from ..security import check_password
 # This is to solve the connection problem
@@ -91,15 +92,28 @@ class User:
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT stock_id FROM stock WHERE stock_symbol = %s"
+            query = "SELECT id FROM nasdaq_listed_equities WHERE symbol = %s"
             cursor.execute(query, (stock_symbol,))
             stock = cursor.fetchone()
-            if stock:
-                stock_id = stock["stock_id"]
+            watched = False
+            query = "SELECT * FROM watchlist WHERE user_id = %s AND stock_id = %s"
+            cursor.execute(query, (self.user_id, stock["id"]))
+            watched = cursor.fetchone()
+            print('test1')
+            if stock and not watched:
+                stock_id = stock["id"]
                 query = "INSERT INTO watchlist (user_id, stock_id) VALUES (%s, %s)"
-                cursor.execute(query, (self.user_id, stock_id))
-                conn.commit()
-                return True
+                print('test2')
+                try:
+                    cursor.execute(query, (self.user_id, stock_id))
+                    conn.commit()
+                    print('test3')
+                    return True
+                except Exception as e:
+                    # rollback
+                    conn.rollback()
+                    print(f"Error at addStockToWatchlist(): {e}")
+                    return False
             else:
                 return False
         except Exception as e:
@@ -110,15 +124,20 @@ class User:
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT fund_id FROM fund WHERE fund_name = %s"
+            query = "SELECT fund_id FROM funds WHERE fund_name = %s"
             cursor.execute(query, (fund_name,))
             fund = cursor.fetchone()
             if fund:
-                fund_id = fund["fund_id"]
-                query = "INSERT INTO watchlist (user_id, fund_id) VALUES (%s, %s)"
-                cursor.execute(query, (self.user_id, fund_id))
-                conn.commit()
-                return True
+                try:
+                    fund_id = fund["fund_id"]
+                    query = "INSERT INTO watchlist (user_id, fund_id) VALUES (%s, %s)"
+                    cursor.execute(query, (self.user_id, fund_id))
+                    conn.commit()
+                    return True
+                except Exception as e:
+                    conn.rollback()
+                    print(f"Error at addFundToWatchlist(): {e}")
+                    return False
             else:
                 return False
         except Exception as e:
