@@ -40,7 +40,6 @@ class Admin(User):
             print(f"Error fetching count_active_users: {e}")
             return -1
         
-    # Admin-specific methods
     def get_all_users(self):
         """Admin can get all users."""
         conn = get_db_connection()
@@ -56,6 +55,39 @@ class Admin(User):
             return users
         except Exception as e:
             print(f"Error fetching all users: {e}")
+            return None
+
+
+    def get_all_funds(self):
+        """Admin can get all funds."""
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                SELECT funds.*, user.first_name, user.last_name 
+                FROM funds
+                JOIN user ON funds.user_id = user.userID;
+            """
+            cursor.execute(query)
+            funds = cursor.fetchall()
+            return funds
+        except Exception as e:
+            print(f"Error fetching all funds: {e}")
+            return None
+
+    def get_all_stocks(self):
+        """Admin can get all stocks."""
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                SELECT * FROM nasdaq_listed_equities;
+            """
+            cursor.execute(query)
+            stocks = cursor.fetchall()
+            return stocks
+        except Exception as e:
+            print(f"Error fetching all stocks: {e}")
             return None
 
     def deactivate_user(self, user_id):
@@ -76,7 +108,6 @@ class Admin(User):
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            # Assuming '1' is the role_id for Admin
             query = "UPDATE user SET role_id = 1 WHERE userID = %s"
             cursor.execute(query, (user_id,))
             conn.commit()
@@ -103,7 +134,12 @@ class Admin(User):
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT * FROM nasdaq_equity_transactions"
+            query = """
+                SELECT nasdaq_equity_transactions.*, user.userID, user.first_name, nasdaq_listed_equities.symbol
+                FROM nasdaq_equity_transactions
+                LEFT JOIN user ON user.userID = nasdaq_equity_transactions.user_id
+                LEFT JOIN nasdaq_listed_equities ON nasdaq_listed_equities.id = nasdaq_equity_transactions.stock_id
+            """
             cursor.execute(query)
             equity_transactions = cursor.fetchall()
             return equity_transactions
@@ -116,7 +152,12 @@ class Admin(User):
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT * FROM fund_transactions"
+            query = """
+                SELECT fund_transactions.*, user.userID, user.first_name, funds.fund_name
+                FROM fund_transactions
+                LEFT JOIN user ON user.userID = fund_transactions.user_id
+                LEFT JOIN funds ON funds.fund_id = fund_transactions.fund_id
+            """
             cursor.execute(query)
             fund_transactions = cursor.fetchall()
             return fund_transactions

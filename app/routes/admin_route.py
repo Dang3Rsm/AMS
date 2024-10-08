@@ -30,14 +30,20 @@ def user_management():
 @role_required(1)
 def fund_management():
     admin = Admin.get_current_user()
-    return render_template('admin/admin_fund_management.html', admin_=admin, brand_name=current_app.config['BRAND_NAME'])
+    funds = admin.get_all_funds()
+    if not funds:
+        funds = []
+    return render_template('admin/admin_fund_management.html', admin_=admin, funds=funds, brand_name=current_app.config['BRAND_NAME'])
 
 @admin.route('/stock_management',methods=['GET', 'POST'])
 @login_required
 @role_required(1)
 def stock_management():
     admin = Admin.get_current_user()
-    return render_template('admin/admin_stock_management.html', admin_=admin, brand_name=current_app.config['BRAND_NAME'])
+    stocks = admin.get_all_stocks()
+    if not stocks:
+        stocks = []
+    return render_template('admin/admin_stock_management.html', admin_=admin, stocks=stocks, brand_name=current_app.config['BRAND_NAME'])
 
 @admin.route('/transactions',methods=['GET', 'POST'])
 @login_required
