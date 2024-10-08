@@ -8,11 +8,6 @@ from flask import redirect
 from flask import url_for
 from ..decorators import login_required, role_required, debug
 
-
-# @app.route('/')
-# def index():
-    # return render_template('index.html')
-
 db = Blueprint('dashboard', __name__)
 
 @debug
@@ -40,7 +35,6 @@ def admin_dashboard():
         "active" : active_users,
         "inactive" : inactive_users
     }
-    print(*count)
     if admin:
         return render_template('admin/admin_dashboard.html',count=count,brand_name=current_app.config['BRAND_NAME'],admin_=admin)
     else:
