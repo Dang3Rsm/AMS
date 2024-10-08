@@ -11,43 +11,68 @@
                     <h5 class="card-title">{{ fund.fund_name }}</h5>
                     <p class="card-text">
                         <strong>NAV:</strong> ${{ fund.NAV }}<br>
-                        <strong>Price Change:</strong>
-                        <span class="{% if fund.change > 0 %}text-success{% else %}text-danger{% endif %}">
-                            {{ fund.change }}%
-                        </span>
+                        <strong>1D return:</strong>
+                        <span class="{% if fund.change is not none and fund.change > 0 %}text-success{% else %}text-danger{% endif %}">
+                            {{ fund.change if fund.change is not none else 'N/A' }}%
+                        </span>                        
                     </p>
-                    <a href="{{ url_for('user.add_fund_to_watchlist', fund_id=fund.id) }}" class="btn btn-primary">
+                    <a href="{{ url_for('user.add_fund_to_watchlist', fund_id=fund.fund_id) }}" class="btn btn-primary">
                         Add to Watchlist
                     </a>
+
                     <!-- BUY BUTTON -->
-                    <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#buyModal{{ fund.fund_id }}">
                         <i class="fas fa-arrow-up"></i> Buy
                     </a>
 
-                    <!-- Add User Modal -->
-                    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+                    <!-- SELL BUTTON -->
+                    <a href="#" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#sellModal{{ fund.fund_id }}">
+                        <i class="fas fa-arrow-down"></i> Sell
+                    </a>
+
+                    <!-- Buy Modal -->
+                    <div class="modal fade" id="buyModal{{ fund.fund_id }}" tabindex="-1" aria-labelledby="buyModalLabel{{ fund.fund_id }}" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content {% if user_.darkMode == 1 %}bg-dark text-white{% endif %}">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                                    <h5 class="modal-title" id="buyModalLabel{{ fund.fund_id }}">Buy {{ fund.fund_name }}</h5>
                                     <button type="button" class="btn-close {% if user_.darkMode == 1 %}btn-close-white{% endif %}" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <form action="#" method="POST" id="addUserForm">
+                                    <form action="" method="POST">
                                         <div class="mb-3">
-                                            <label for="firstName" class="form-label">First Name</label>
-                                            <input type="text" class="form-control" id="firstName" name="first_name" required>
+                                            <label for="quantity" class="form-label">Quantity</label>
+                                            <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
                                         </div>
+                                        <p>Current NAV: ${{ fund.NAV }}</p>
+                                        <button type="submit" class="btn btn-success">Confirm Buy</button>
                                     </form>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- SELL BUTTON -->
-                    <a href="#" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                        <i class="fas fa-arrow-down"></i> Sell
-                    </a>
+                    <!-- Sell Modal -->
+                    <div class="modal fade" id="sellModal{{ fund.fund_id }}" tabindex="-1" aria-labelledby="sellModalLabel{{ fund.fund_id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content {% if user_.darkMode == 1 %}bg-dark text-white{% endif %}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="sellModalLabel{{ fund.fund_id }}">Sell {{ fund.fund_name }}</h5>
+                                    <button type="button" class="btn-close {% if user_.darkMode == 1 %}btn-close-white{% endif %}" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="" method="POST">
+                                        <div class="mb-3">
+                                            <label for="quantity" class="form-label">Quantity</label>
+                                            <input type="number" class="form-control" id="quantity" name="quantity" min="1" required>
+                                        </div>
+                                        <p>Current NAV: ${{ fund.NAV }}</p>
+                                        <button type="submit" class="btn btn-danger">Confirm Sell</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

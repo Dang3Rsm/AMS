@@ -194,6 +194,7 @@ class User:
 
                 stock_list.append(
                     {
+                        "stock_id": stock['stock_id'],
                         "symbol": stock['symbol'],
                         "name": stock['name'],
                         "current_price": current_price,
@@ -288,13 +289,80 @@ class User:
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT * FROM client_orders WHERE client_id = %s"
+            query = """
+                SELECT nasdaq_listed_equities.symbol, client_orders.* 
+                FROM client_orders 
+                JOIN nasdaq_listed_equities on client_orders.stock_id = nasdaq_listed_equities.id
+                WHERE client_id = %s"""
             cursor.execute(query, (self.user_id,))
             orders = cursor.fetchall()
             return orders
         except Exception as e:
             print(f"Error at getOrders(): {e}")
             return None
+        
+    def placeOrder(self,stock_id,fund_id,order_type,qty,price):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                INSERT INTO client_orders (client_id, stock_id, fund_id, quantity, price, order_type, status, created_by, updated_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """
+            cursor.execute(query, (self.user_id, stock_id, fund_id, qty, price, order_type, 'Pending', self.user_id, self.user_id))
+            conn.commit()
+            order_id = cursor.lastrowid
+            return order_id
+        except Exception as e:
+            print(f"Error at placeOrder(): {e}")
+            return False
+        
+    def editOrder(self, order_id, new_quantity=None, new_price=None, new_order_type=None, new_status='Pending'):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = "UPDATE client_orders SET "
+            updates = []
+            parameters = []
+            
+            if new_quantity is not None:
+                updates.append("quantity = %s")
+                parameters.append(new_quantity)
+            
+            if new_price is not None:
+                updates.append("price = %s")
+                parameters.append(new_price)
+            
+            if new_order_type is not None:
+                updates.append("order_type = %s")
+                parameters.append(new_order_type)
+
+            if new_status != 'Pending':
+                updates.append("status = %s")
+                parameters.append(new_status)
+
+            if updates:
+                query += ", ".join(updates)
+                query += " WHERE order_id = %s"
+                parameters.append(order_id)
+
+                cursor.execute(query, parameters)
+                conn.commit()
+                
+                if cursor.rowcount > 0:
+                    print(f"Order {order_id} updated successfully.")
+                    return True
+                else:
+                    print(f"No order found with ID {order_id}.")
+                    return False
+            else:
+                print("No updates provided.")
+                return False
+        except Exception as e:
+            print(f"Error at editOrder(): {e}")
+            return False
+
+
         
     def get_all_funds(self):
         conn = get_db_connection()
