@@ -70,44 +70,164 @@ class User:
 
     # symbol, name, current_price, change
     def getWatchlist(self):
+        """Retrieve watchlist items for the user, including current price, PnL, and change for both stocks and mutual funds."""
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = """
+
+            # Stock watchlist query
+            stock_query = """
                 SELECT 
-                    w.user_id,
                     e.id AS stock_id,
                     e.symbol AS symbol,
                     e.name AS name,
-                    ph.current_price AS current_price
+                    ph.current_price AS current_price,
+                    pph.previous_price AS previous_price
                 FROM 
                     watchlist w
                 JOIN 
                     nasdaq_listed_equities e ON w.stock_id = e.id
-                JOIN 
-                    (SELECT 
-                        stock_id, 
-                        close_price AS current_price 
-                    FROM 
-                        equity_price_history 
-                    LIMIT 1) ph ON w.stock_id = ph.stock_id
+                LEFT JOIN 
+                    (
+                        SELECT 
+                            stock_id, 
+                            close_price AS current_price 
+                        FROM 
+                            equity_price_history eph
+                        WHERE 
+                            eph.price_date = (
+                                SELECT MAX(price_date) 
+                                FROM equity_price_history 
+                                WHERE stock_id = eph.stock_id
+                            )
+                    ) ph ON w.stock_id = ph.stock_id
+                LEFT JOIN 
+                    (
+                        SELECT 
+                            stock_id, 
+                            close_price AS previous_price
+                        FROM 
+                            equity_price_history eph
+                        WHERE 
+                            eph.price_date = (
+                                SELECT MAX(price_date) 
+                                FROM equity_price_history 
+                                WHERE stock_id = eph.stock_id
+                                AND price_date < (
+                                    SELECT MAX(price_date)
+                                    FROM equity_price_history 
+                                    WHERE stock_id = eph.stock_id
+                                )
+                            )
+                    ) pph ON w.stock_id = pph.stock_id
                 WHERE 
-                    w.user_id = 40;
+                    w.user_id = %s;
             """
-            cursor.execute(query, (self.user_id,))
-            watchlist = cursor.fetchall()
-            print(f"watchlist {watchlist}")
-            watchlist_stocks = []
-            watchlist_funds = []
-            for item in watchlist:
-                if item["stock_id"]:
-                    watchlist_stocks.append(item)
-                elif item["fund_id"]:
-                    watchlist_funds.append(item)
-            return watchlist_stocks, watchlist_funds
+
+            cursor.execute(stock_query, (self.user_id,))
+            stock_watchlist = cursor.fetchall()
+
+            # Fund watchlist query
+            fund_query = """
+                SELECT 
+                    f.fund_id AS fund_id,
+                    f.fund_name AS name,
+                    ph.current_price AS current_price,
+                    pph.previous_price AS previous_price
+                FROM 
+                    watchlist w
+                JOIN 
+                    funds f ON w.fund_id = f.fund_id
+                LEFT JOIN 
+                    (
+                        SELECT 
+                            fund_id, 
+                            price AS current_price 
+                        FROM 
+                            fund_price_history fph
+                        WHERE 
+                            fph.date = (
+                                SELECT MAX(date) 
+                                FROM fund_price_history 
+                                WHERE fund_id = fph.fund_id
+                            )
+                    ) ph ON w.fund_id = ph.fund_id
+                LEFT JOIN 
+                    (
+                        SELECT 
+                            fund_id, 
+                            price AS previous_price
+                        FROM 
+                            fund_price_history fph
+                        WHERE 
+                            fph.date = (
+                                SELECT MAX(date) 
+                                FROM fund_price_history 
+                                WHERE fund_id = fph.fund_id
+                                AND date < (
+                                    SELECT MAX(date)
+                                    FROM fund_price_history 
+                                    WHERE fund_id = fph.fund_id
+                                )
+                            )
+                    ) pph ON w.fund_id = pph.fund_id
+                WHERE 
+                    w.user_id = %s;
+            """
+
+            cursor.execute(fund_query, (self.user_id,))
+            fund_watchlist = cursor.fetchall()
+
+            stock_list = []
+            for stock in stock_watchlist:
+                current_price = stock["current_price"]
+                previous_price = stock["previous_price"]
+                pnl = None
+                change = None
+
+                if current_price is not None and previous_price is not None:
+                    pnl = current_price - previous_price
+                    change = (pnl / previous_price) * 100 if previous_price != 0 else None
+                    pnl = round(pnl, 2)
+                    change = round(change, 2) if change is not None else None
+
+                stock_list.append(
+                    {
+                        "symbol": stock['symbol'],
+                        "name": stock['name'],
+                        "current_price": current_price,
+                        "pnl": pnl,
+                        "change": change
+                    }
+                )
+
+            fund_list = []
+            for fund in fund_watchlist:
+                current_price = fund["current_price"]
+                previous_price = fund["previous_price"]
+                pnl = None
+                change = None
+
+                if current_price is not None and previous_price is not None:
+                    pnl = current_price - previous_price
+                    change = (pnl / previous_price) * 100 if previous_price != 0 else None
+                    pnl = round(pnl, 2)
+                    change = round(change, 2) if change is not None else None
+
+                fund_list.append(
+                    {
+                        "name": fund['name'],
+                        "current_price": current_price,
+                        "pnl": pnl,
+                        "change": change
+                    }
+                )
+            return stock_list, fund_list
+
         except Exception as e:
             print(f"Error at getWatchlist(): {e}")
             return None
+
 
     def addStockToWatchlist(self, stock_symbol):
         conn = get_db_connection()

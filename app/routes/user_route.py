@@ -9,12 +9,7 @@ from flask import flash
 from flask import session
 from ..decorators import login_required, role_required
 
-# @app.route('/')
-# def index():
-    # return render_template('index.html')
-
 usr = Blueprint('user', __name__)
-
 
 @usr.route('/profile',methods=['GET', 'POST'])
 @login_required
@@ -97,8 +92,10 @@ def watchlist():
         return redirect(url_for('user.watchlist'))
     else:
         stocks_data, funds_data = user.getWatchlist()
-        stocks_data = []
-        funds_data = []
+        if not stocks_data:
+            stocks_data = []
+        if not funds_data:
+            funds_data = []
         return render_template('user/user_watchlist.html',user_=user,watchlist={"stocks": stocks_data, "funds": funds_data},brand_name=current_app.config['BRAND_NAME'])
 
 @usr.route('/remove_from_watchlist/stock/<string:stock_symbol>', methods=['POST'])
