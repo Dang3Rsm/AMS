@@ -6,9 +6,69 @@
         
         <!-- Add User Button -->
         <div class="mb-3">
-            <a href="#" class="btn btn-primary">
+            <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
                 <i class="fas fa-user-plus"></i> Add New User
             </a>
+        </div>
+
+        <!-- Add User Modal -->
+        <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content {% if admin_.darkMode == 1 %}bg-dark text-white{% endif %}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                        <button type="button" class="btn-close {% if admin_.darkMode == 1 %}btn-close-white{% endif %}" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{{ url_for('admin.add_new_user') }}" method="POST" id="addUserForm">
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstName" name="first_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" name="last_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Select Role</label>
+                                <select class="form-select" id="role" name="role" required>
+                                    {% for role in roles %}
+                                    <option value="{{ role.role_id }}">{{ role.role_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" id="phone" name="phone_number" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="dob" class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" id="dob" name="dob" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="address" name="street_address" placeholder="Street Address" required>
+                                <input type="text" class="form-control mt-2" id="city" name="city" placeholder="City" required>
+                                <input type="text" class="form-control mt-2" id="state" name="state" placeholder="State" required>
+                                <input type="text" class="form-control mt-2" id="pincode" name="pincode" placeholder="Pincode" required>
+                                <input type="text" class="form-control mt-2" id="country" name="country" placeholder="Country" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Add User</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- User Table -->
@@ -55,7 +115,7 @@
                                 </a>
                         
                                 <!-- Toggle Active/Inactive Status -->
-                                <form action="#" method="POST" class="d-inline">
+                                <form action="{{ url_for('admin.toggle_activate_user', user_id=user.userID) }}" method="POST" class="d-inline">
                                     {% if user.is_active %}
                                         <button type="submit" class="btn btn-secondary btn-sm" title="Deactivate">
                                             <i class="fas fa-user-times"></i>
@@ -77,7 +137,6 @@
                                 <!-- Modal Structure for Each User -->
                                 <div class="modal fade" id="userInfoModal{{ user.userID }}" tabindex="-1" aria-labelledby="userInfoModalLabel{{ user.userID }}" aria-hidden="true">
                                     <div class="modal-dialog modal-lg">
-                                        <!-- Conditionally apply dark mode to the modal -->
                                         <div class="modal-content {% if admin_.darkMode == 1 %}bg-dark text-white{% endif %}">
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="userInfoModalLabel{{ user.userID }}">User Information</h5>

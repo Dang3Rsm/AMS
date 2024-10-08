@@ -90,18 +90,28 @@ class Admin(User):
             print(f"Error fetching all stocks: {e}")
             return None
 
-    def deactivate_user(self, user_id):
-        """Admin can deactivate a user account."""
+    def toggle_activate_user(self, user_id):
+        """Admin can toggle is_active of a user account."""
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "UPDATE user SET is_active = 0 WHERE userID = %s"
-            cursor.execute(query, (user_id,))
-            conn.commit()
-            return True
+            select_query = "SELECT is_active FROM user WHERE userID = %s"
+            cursor.execute(select_query, (user_id,))
+            result = cursor.fetchone()
+            if result is not None:
+                current_status = result['is_active']
+                new_status = 0 if current_status else 1
+                update_query = "UPDATE user SET is_active = %s WHERE userID = %s"
+                cursor.execute(update_query, (new_status, user_id))
+                conn.commit()
+                return True
+            else:
+                print(f"No user found with userID {user_id}")
+                return False
         except Exception as e:
-            print(f"Error deactivating user {user_id}: {e}")
+            print(f"Error toggling user status for userID {user_id}: {e}")
             return False
+
 
     def promote_to_admin(self, user_id):
         """Admin can promote a user to an admin role."""
