@@ -96,6 +96,66 @@ class User:
             print(f"Error at getOrders(): {e}")
             return None
         
+    def get_all_funds(self):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                SELECT 
+                    f.fund_id, 
+                    f.fund_name, 
+                    ph.price AS nav,
+                    (SELECT price 
+                    FROM fund_price_history 
+                    WHERE fund_id = f.fund_id 
+                    AND date < (SELECT MAX(date) FROM fund_price_history WHERE fund_id = f.fund_id)
+                    ORDER BY date DESC 
+                    LIMIT 1) AS previous_price
+                FROM 
+                    funds f
+                LEFT JOIN 
+                    (SELECT 
+                        fund_id, 
+                        price, 
+                        date
+                    FROM 
+                        fund_price_history 
+                    WHERE 
+                        (fund_id, date) IN 
+                        (SELECT fund_id, MAX(date) 
+                        FROM fund_price_history 
+                        GROUP BY fund_id)) AS ph ON f.fund_id = ph.fund_id
+                ORDER BY 
+                    f.fund_id;
+            """
+            cursor.execute(query)
+            funds = cursor.fetchall()
+            fund_list = []
+            for fund in funds:
+                fund_id = fund['fund_id']
+                fund_name = fund['fund_name']
+                nav = fund['nav']
+                prev_nav = fund['previous_price']
+                percentage_change = None
+                if nav is not None and prev_nav is not None:
+                    percentage_change = ((nav-prev_nav)/prev_nav)*100
+                    percentage_change = round(percentage_change, 2)
+
+                fund_list.append(
+                    {
+                        "fund_id": fund_id,
+                        "fund_name": fund_name,
+                        "NAV": nav,
+                        "change": percentage_change
+                    } 
+                )
+            
+            return fund_list
+        except Exception as e:
+            print(f"Error at get_all_funds(): {e}")
+            return None
+
+        
     @staticmethod
     def authenticate(email: str, password: str) -> tuple:
         conn = get_db_connection()

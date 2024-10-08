@@ -129,14 +129,9 @@ def funds():
     if request.method == 'POST':
         return redirect(url_for('user.mututal_funds'))
     else:
-        mutual_funds = [
-            {"id": 1, "name": "Vanguard 500 Index Fund", "current_price": 315.75, "change": 0.9},
-            {"id": 2, "name": "Fidelity Contrafund", "current_price": 225.50, "change": -1.2},
-            {"id": 3, "name": "T. Rowe Price Blue Chip Growth Fund", "current_price": 139.60, "change": 1.4},
-            {"id": 4, "name": "American Funds Growth Fund", "current_price": 156.80, "change": 0.2},
-            {"id": 5, "name": "Dodge & Cox Stock Fund", "current_price": 204.15, "change": -0.5},
-            {"id": 6, "name": "TIAA-CREF Social Choice Fund", "current_price": 126.95, "change": 0.7}
-        ]
+        mutual_funds = user.get_all_funds()
+        if not mutual_funds:
+            mutual_funds = []
         return render_template('user/user_mutualFunds.html',user_=user,mutual_funds=mutual_funds,brand_name=current_app.config['BRAND_NAME'])
     
 
