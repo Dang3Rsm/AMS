@@ -15,16 +15,13 @@
                         <span class="{% if fund.change is not none and fund.change > 0 %}text-success{% else %}text-danger{% endif %}">
                             {{ fund.change if fund.change is not none else 'N/A' }}%
                         </span>                        
-                    </p>                    <form action="{{ url_for('user.add_fund_to_watchlist') }}" method="POST"> 
+                    </p>                    
+                    <form action="{{ url_for('user.add_fund_to_watchlist') }}" method="POST"> 
                          <input type="hidden" name="fund_name" value="{{ fund.fund_name }}"> 
                          <button type="submit" class="btn btn-primary"> 
                              Add to Watchlist 
                          </button> 
                      </form> 
-                  </div> 
-              </div> 
-          </div>
-
                     <!-- BUY BUTTON -->
                     <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#buyModal{{ fund.fund_id }}">
                         <i class="fas fa-arrow-up"></i> Buy
