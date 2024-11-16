@@ -124,30 +124,35 @@ CREATE TABLE IF NOT EXISTS fund_portfolio (
 
 CREATE TABLE IF NOT EXISTS client_orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,            -- Unique identifier for each client order
-    client_id INT,                                      -- Foreign key linking to the client in the user table
-    symbol VARCHAR(10),                                -- Symbol of the stock or equity
-    quantity INT,                                      -- Quantity of stock in the order
-    price DECIMAL(10, 2),                              -- Price at which the order was executed
-    order_type ENUM('BUY', 'SELL') NOT NULL,           -- Indicates whether the order is a buy or sell
-    order_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,   -- Date & time when the order was placed
-    status ENUM('Pending', 'Completed', 'Cancelled') DEFAULT 'Pending', -- Status of the order
-    created_by INT,                                   -- ID of the user who created this order
-    updated_by INT,                                   -- ID of the user who last updated this order
-    FOREIGN KEY (client_id) REFERENCES user(userID),   -- Foreign key constraint to link the client
-    -- FOREIGN KEY (symbol) REFERENCES nasdaq_listed_equities(symbol),  -- Foreign key constraint for stock reference
-    FOREIGN KEY (created_by) REFERENCES user(userID),   -- Foreign key linking to the user who created the order
-    FOREIGN KEY (updated_by) REFERENCES user(userID)    -- Foreign key linking to the user who last updated the order
+    client_id INT NOT NULL,                             -- Foreign key linking to the client in the user table
+    stock_id INT DEFAULT NULL,                          -- Foreign key for stocks, nullable if the order is for a fund
+    fund_id INT DEFAULT NULL,                           -- Foreign key for funds, nullable if the order is for a stock
+    quantity INT UNSIGNED NOT NULL,                     -- Quantity of stock or fund, should be positive
+    price DECIMAL(10, 2) NOT NULL,                      -- Price at which the order was executed
+    order_type ENUM('BUY', 'SELL') NOT NULL,            -- Indicates whether the order is a buy or sell
+    order_datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Date & time when the order was placed
+    status ENUM('Pending', 'Completed', 'Cancelled') DEFAULT 'Pending' NOT NULL, -- Status of the order
+    created_by INT NOT NULL,                            -- ID of the user who created this order
+    updated_by INT NOT NULL,                            -- ID of the user who last updated this order,
+    
+    -- Foreign key constraints
+    FOREIGN KEY (client_id) REFERENCES user(userID) ON DELETE CASCADE, 
+    FOREIGN KEY (stock_id) REFERENCES nasdaq_listed_equities(id) ON DELETE SET NULL, 
+    FOREIGN KEY (fund_id) REFERENCES funds(fund_id) ON DELETE SET NULL, 
+    FOREIGN KEY (created_by) REFERENCES user(userID) ON DELETE CASCADE,  
+    FOREIGN KEY (updated_by) REFERENCES user(userID) ON DELETE CASCADE
 );
+
 
 CREATE TABLE IF NOT EXISTS fund_orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,            -- Unique identifier for each fund order
     fund_id INT,                                        -- Foreign key linking to the fund in the funds table
     stock_id INT,                                       -- Foreign key linking to the stock/equity table
     quantity INT,                                       -- Quantity of stock in the order
-    price DECIMAL(10, 4),                               -- Price at which the order was executed
+    price DECIMAL(10, 2),                               -- Price at which the order was executed
     order_type ENUM('BUY', 'SELL') NOT NULL,            -- Indicates whether the order is a buy or sell
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- Timestamp when the order was placed
-    status ENUM('Pending', 'Completed', 'Cancelled') NOT NULL, -- Status of the order
+    status ENUM('Pending', 'Completed', 'Cancelled') DEFAULT 'Pending' NOT NULL, -- Status of the order
     created_by INT,                                     -- ID of the user who created this record
     updated_by INT,                                     -- ID of the user who last updated this record
     FOREIGN KEY (fund_id) REFERENCES fund_portfolio(portfolio_id),  -- Foreign key constraint to link the fund

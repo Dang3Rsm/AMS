@@ -30,7 +30,7 @@
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>{{ stock.symbol }}</td>
-                    <td>{{ stock.company_name }}</td>
+                    <td>{{ stock.name }}</td>
                     <td>{{ stock.current_price }}</td>
                     <td class="{% if stock.change > 0 %}text-success{% else %}text-danger{% endif %}">
                         {{ stock.change }}%
@@ -63,7 +63,7 @@
                 <tr>
                     <th>#</th>
                     <th>Fund Name</th>
-                    <th>Net Asset Value (NAV)</th>
+                    <th>Current Net Asset Value (NAV)</th>
                     <th>Change</th>
                     <th>Actions</th>
                 </tr>
@@ -72,13 +72,13 @@
                 {% for fund in watchlist.funds %}
                 <tr>
                     <td>{{ loop.index }}</td>
-                    <td>{{ fund.fund_name }}</td>
-                    <td>{{ fund.nav }}</td>
+                    <td>{{ fund.name }}</td>
+                    <td>{{ fund.current_price }}</td>
                     <td class="{% if fund.change > 0 %}text-success{% else %}text-danger{% endif %}">
                         {{ fund.change }}%
                     </td>
                     <td>
-                        <a href="{{ url_for('user.remove_from_watchlist_fund', fund_id=fund.fund_id) }}" class="text-danger"><i class="fas fa-trash-alt"></i></a>
+                        <a href="#" class="text-danger"><i class="fas fa-trash-alt"></i></a>
                     </td>
                 </tr>
                 {% endfor %}

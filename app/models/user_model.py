@@ -1,5 +1,5 @@
 from app.db import get_db_connection
-from app.models.stock_model import Stock
+
 from flask import session
 from ..security import check_password
 # This is to solve the connection problem
@@ -71,68 +71,179 @@ class User:
 
     # symbol, name, current_price, change
     def getWatchlist(self):
+        """Retrieve watchlist items for the user, including current price, PnL, and change for both stocks and mutual funds."""
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = """
+
+            # Stock watchlist query
+            stock_query = """
                 SELECT 
-                    w.user_id,
                     e.id AS stock_id,
                     e.symbol AS symbol,
                     e.name AS name,
-                    ph.current_price AS current_price
+                    ph.current_price AS current_price,
+                    pph.previous_price AS previous_price
                 FROM 
                     watchlist w
                 JOIN 
                     nasdaq_listed_equities e ON w.stock_id = e.id
-                JOIN 
-                    (SELECT 
-                        stock_id, 
-                        close_price AS current_price 
-                    FROM 
-                        equity_price_history 
-                    LIMIT 1) ph ON w.stock_id = ph.stock_id
+                LEFT JOIN 
+                    (
+                        SELECT 
+                            stock_id, 
+                            close_price AS current_price 
+                        FROM 
+                            equity_price_history eph
+                        WHERE 
+                            eph.price_date = (
+                                SELECT MAX(price_date) 
+                                FROM equity_price_history 
+                                WHERE stock_id = eph.stock_id
+                            )
+                    ) ph ON w.stock_id = ph.stock_id
+                LEFT JOIN 
+                    (
+                        SELECT 
+                            stock_id, 
+                            close_price AS previous_price
+                        FROM 
+                            equity_price_history eph
+                        WHERE 
+                            eph.price_date = (
+                                SELECT MAX(price_date) 
+                                FROM equity_price_history 
+                                WHERE stock_id = eph.stock_id
+                                AND price_date < (
+                                    SELECT MAX(price_date)
+                                    FROM equity_price_history 
+                                    WHERE stock_id = eph.stock_id
+                                )
+                            )
+                    ) pph ON w.stock_id = pph.stock_id
                 WHERE 
-                    w.user_id = 40;
+                    w.user_id = %s;
             """
-            cursor.execute(query, (self.user_id,))
-            watchlist = cursor.fetchall()
-            print(f"watchlist {watchlist}")
-            watchlist_stocks = []
-            watchlist_funds = []
-            for item in watchlist:
-                if item["stock_id"]:
-                    watchlist_stocks.append(item)
-                elif item["fund_id"]:
-                    watchlist_funds.append(item)
-            return watchlist_stocks, watchlist_funds
+
+            cursor.execute(stock_query, (self.user_id,))
+            stock_watchlist = cursor.fetchall()
+
+            # Fund watchlist query
+            fund_query = """
+                SELECT 
+                    f.fund_id AS fund_id,
+                    f.fund_name AS name,
+                    ph.current_price AS current_price,
+                    pph.previous_price AS previous_price
+                FROM 
+                    watchlist w
+                JOIN 
+                    funds f ON w.fund_id = f.fund_id
+                LEFT JOIN 
+                    (
+                        SELECT 
+                            fund_id, 
+                            price AS current_price 
+                        FROM 
+                            fund_price_history fph
+                        WHERE 
+                            fph.date = (
+                                SELECT MAX(date) 
+                                FROM fund_price_history 
+                                WHERE fund_id = fph.fund_id
+                            )
+                    ) ph ON w.fund_id = ph.fund_id
+                LEFT JOIN 
+                    (
+                        SELECT 
+                            fund_id, 
+                            price AS previous_price
+                        FROM 
+                            fund_price_history fph
+                        WHERE 
+                            fph.date = (
+                                SELECT MAX(date) 
+                                FROM fund_price_history 
+                                WHERE fund_id = fph.fund_id
+                                AND date < (
+                                    SELECT MAX(date)
+                                    FROM fund_price_history 
+                                    WHERE fund_id = fph.fund_id
+                                )
+                            )
+                    ) pph ON w.fund_id = pph.fund_id
+                WHERE 
+                    w.user_id = %s;
+            """
+
+            cursor.execute(fund_query, (self.user_id,))
+            fund_watchlist = cursor.fetchall()
+
+            stock_list = []
+            for stock in stock_watchlist:
+                current_price = stock["current_price"]
+                previous_price = stock["previous_price"]
+                pnl = None
+                change = None
+
+                if current_price is not None and previous_price is not None:
+                    pnl = current_price - previous_price
+                    change = (pnl / previous_price) * 100 if previous_price != 0 else None
+                    pnl = round(pnl, 2)
+                    change = round(change, 2) if change is not None else None
+
+                stock_list.append(
+                    {
+                        "stock_id": stock['stock_id'],
+                        "symbol": stock['symbol'],
+                        "name": stock['name'],
+                        "current_price": current_price,
+                        "pnl": pnl,
+                        "change": change
+                    }
+                )
+
+            fund_list = []
+            for fund in fund_watchlist:
+                current_price = fund["current_price"]
+                previous_price = fund["previous_price"]
+                pnl = None
+                change = None
+
+                if current_price is not None and previous_price is not None:
+                    pnl = current_price - previous_price
+                    change = (pnl / previous_price) * 100 if previous_price != 0 else None
+                    pnl = round(pnl, 2)
+                    change = round(change, 2) if change is not None else None
+
+                fund_list.append(
+                    {
+                        "name": fund['name'],
+                        "current_price": current_price,
+                        "pnl": pnl,
+                        "change": change
+                    }
+                )
+            return stock_list, fund_list
+
         except Exception as e:
             print(f"Error at getWatchlist(): {e}")
             return None
+
 
     def addStockToWatchlist(self, stock_symbol):
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT id FROM nasdaq_listed_equities WHERE symbol = %s"
+            query = "SELECT stock_id FROM stock WHERE stock_symbol = %s"
             cursor.execute(query, (stock_symbol,))
             stock = cursor.fetchone()
-            watched = False
-            query = "SELECT * FROM watchlist WHERE user_id = %s AND stock_id = %s"
-            cursor.execute(query, (self.user_id, stock["id"]))
-            watched = cursor.fetchone()
-            if stock and not watched:
-                stock_id = stock["id"]
+            if stock:
+                stock_id = stock["stock_id"]
                 query = "INSERT INTO watchlist (user_id, stock_id) VALUES (%s, %s)"
-                try:
-                    cursor.execute(query, (self.user_id, stock_id))
-                    conn.commit()
-                    return True
-                except Exception as e:
-                    # rollback
-                    conn.rollback()
-                    print(f"Error at addStockToWatchlist(): {e}")
-                    return False
+                cursor.execute(query, (self.user_id, stock_id))
+                conn.commit()
+                return True
             else:
                 return False
         except Exception as e:
@@ -143,20 +254,15 @@ class User:
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT fund_id FROM funds WHERE fund_name = %s"
+            query = "SELECT fund_id FROM fund WHERE fund_name = %s"
             cursor.execute(query, (fund_name,))
             fund = cursor.fetchone()
             if fund:
-                try:
-                    fund_id = fund["fund_id"]
-                    query = "INSERT INTO watchlist (user_id, fund_id) VALUES (%s, %s)"
-                    cursor.execute(query, (self.user_id, fund_id))
-                    conn.commit()
-                    return True
-                except Exception as e:
-                    conn.rollback()
-                    print(f"Error at addFundToWatchlist(): {e}")
-                    return False
+                fund_id = fund["fund_id"]
+                query = "INSERT INTO watchlist (user_id, fund_id) VALUES (%s, %s)"
+                cursor.execute(query, (self.user_id, fund_id))
+                conn.commit()
+                return True
             else:
                 return False
         except Exception as e:
@@ -183,13 +289,80 @@ class User:
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT * FROM client_orders WHERE client_id = %s"
+            query = """
+                SELECT nasdaq_listed_equities.symbol, client_orders.* 
+                FROM client_orders 
+                JOIN nasdaq_listed_equities on client_orders.stock_id = nasdaq_listed_equities.id
+                WHERE client_id = %s"""
             cursor.execute(query, (self.user_id,))
             orders = cursor.fetchall()
             return orders
         except Exception as e:
             print(f"Error at getOrders(): {e}")
             return None
+        
+    def placeOrder(self,stock_id,fund_id,order_type,qty,price):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = """
+                INSERT INTO client_orders (client_id, stock_id, fund_id, quantity, price, order_type, status, created_by, updated_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """
+            cursor.execute(query, (self.user_id, stock_id, fund_id, qty, price, order_type, 'Pending', self.user_id, self.user_id))
+            conn.commit()
+            order_id = cursor.lastrowid
+            return order_id
+        except Exception as e:
+            print(f"Error at placeOrder(): {e}")
+            return False
+        
+    def editOrder(self, order_id, new_quantity=None, new_price=None, new_order_type=None, new_status='Pending'):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = "UPDATE client_orders SET "
+            updates = []
+            parameters = []
+            
+            if new_quantity is not None:
+                updates.append("quantity = %s")
+                parameters.append(new_quantity)
+            
+            if new_price is not None:
+                updates.append("price = %s")
+                parameters.append(new_price)
+            
+            if new_order_type is not None:
+                updates.append("order_type = %s")
+                parameters.append(new_order_type)
+
+            if new_status != 'Pending':
+                updates.append("status = %s")
+                parameters.append(new_status)
+
+            if updates:
+                query += ", ".join(updates)
+                query += " WHERE order_id = %s"
+                parameters.append(order_id)
+
+                cursor.execute(query, parameters)
+                conn.commit()
+                
+                if cursor.rowcount > 0:
+                    print(f"Order {order_id} updated successfully.")
+                    return True
+                else:
+                    print(f"No order found with ID {order_id}.")
+                    return False
+            else:
+                print("No updates provided.")
+                return False
+        except Exception as e:
+            print(f"Error at editOrder(): {e}")
+            return False
+
+
         
     def get_all_funds(self):
         conn = get_db_connection()

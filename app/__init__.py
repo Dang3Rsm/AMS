@@ -39,7 +39,7 @@ def fetch_stock_data_wrapper():
 
 def start_app_scheduler(app):
     # Add the job to the scheduler
-    # scheduler.add_job(func=fetch_stock_data_wrapper, trigger="interval", seconds=10, id='fetch_stock_data', replace_existing=True)
-    scheduler.add_job(func=fetch_stock_data_wrapper, trigger="cron", hour=0, minute=52, id='fetch_stock_data', replace_existing=True)
+    scheduler.add_job(func=fetch_stock_data_wrapper, trigger="interval", seconds=3600, id='fetch_stock_data', replace_existing=True)
+    # scheduler.add_job(func=fetch_stock_data_wrapper, trigger="cron", hour=0, minute=52, id='fetch_stock_data', replace_existing=True)
     # Start the scheduler
     scheduler.start()

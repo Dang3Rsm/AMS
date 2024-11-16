@@ -10,14 +10,42 @@ from flask import url_for
 from flask import flash
 from flask import session
 from flask import jsonify
+from flask import copy_current_request_context
 from ..decorators import login_required, role_required
-
-# @app.route('/')
-# def index():
-    # return render_template('index.html')
+import random
+from threading import Thread
+import time
 
 usr = Blueprint('user', __name__)
 
+######################### Book Keeping Simlation ##################
+def process_order(order_id):
+    time.sleep(7)
+    with current_app.app_context():
+        if random.random() < 0.7:
+            complete_order(order_id)
+            return True
+        else:
+            cancel_order(order_id)
+            return False
+
+def complete_order(order_id):
+    user = User.get_current_user()
+    if user.editOrder(order_id=order_id, new_status='Completed'):
+        print(f"Order {order_id} completed successfully.")
+        return True
+    else:
+        print(f"Failed to complete order {order_id}.")
+        return False
+
+def cancel_order(order_id):
+    user = User.get_current_user()
+    if user.editOrder(order_id=order_id, new_status='Cancelled'):
+        print(f"Order {order_id} cancelled successfully.")
+    else:
+        print(f"Failed to cancel order {order_id}.")
+
+#####################################################################
 
 @usr.route('/profile',methods=['GET', 'POST'])
 @login_required
@@ -42,16 +70,63 @@ def current_orders():
             orders = []
         return render_template('user/user_current_orders.html', user_=user, orders=orders, brand_name=current_app.config['BRAND_NAME'])
 
-@usr.route('/place_order',methods=['GET', 'POST'])
+@usr.route('/place_order', methods=['GET', 'POST'])
 @login_required
 @role_required(4)
 def place_order():
     user = User.get_current_user()
+    
     if request.method == 'POST':
+        stock_id = request.form.get('stock_id')
+        stock_symbol = request.form.get('stock_symbol')
+        quantity = request.form.get('quantity')
+        price = request.form.get('price')
+        order_type = request.form.get('transaction_type')
+        
+        if not stock_id or not quantity or not price or not order_type:
+            flash('All fields are required.', 'danger')
+            return redirect(url_for('user.place_order'))
+        
+        try:
+            quantity = int(quantity)
+            price = float(price)
+
+        except ValueError:
+            flash('Quantity and Price must be numeric values.', 'danger')
+            return redirect(url_for('user.place_order'))
+        
+        if quantity <= 0 or price <= 0:
+            flash('Quantity and Price must be positive values.', 'danger')
+            return redirect(url_for('user.place_order'))
+        
+        if not stock_id:
+            flash(f"Stock with symbol {stock_symbol} not found.", 'danger')
+            return redirect(url_for('user.place_order'))
+
+        try:
+            order_id =  user.placeOrder(stock_id=stock_id, fund_id=None, order_type=order_type, qty=quantity, price=price)
+            if order_id:
+                flash('Order placed successfully!', 'success')
+                @copy_current_request_context
+                def start_processing():
+                    process_order(order_id)
+                Thread(target=start_processing).start()
+                return redirect(url_for('user.current_orders'))
+        except Exception as e:
+            flash(f"Error placing order: {e}", 'danger')
+
         return redirect(url_for('user.place_order'))
+    
     else:
-        exchanges = {"NSE","BSE","MCX"}
-        return render_template('user/user_place_order.html',user_=user,exchanges=exchanges,brand_name=current_app.config['BRAND_NAME'])
+        stocks_data, _ = user.getWatchlist()
+        if not stocks_data:
+            stocks_data = []
+        
+        return render_template('user/user_place_order.html', 
+                               user_=user, 
+                               watchlist={"stocks": stocks_data}, 
+                               brand_name=current_app.config['BRAND_NAME'])
+
 
 @usr.route('/edit_order/<int:order_id>', methods=['GET', 'POST'])
 @login_required
@@ -100,8 +175,10 @@ def watchlist():
         return redirect(url_for('user.watchlist'))
     else:
         stocks_data, funds_data = user.getWatchlist()
-        stocks_data = []
-        funds_data = []
+        if not stocks_data:
+            stocks_data = []
+        if not funds_data:
+            funds_data = []
         return render_template('user/user_watchlist.html',user_=user,watchlist={"stocks": stocks_data, "funds": funds_data},brand_name=current_app.config['BRAND_NAME'])
 
 @usr.route('/remove_from_watchlist/stock/<string:stock_symbol>', methods=['POST'])
