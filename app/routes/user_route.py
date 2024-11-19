@@ -1,6 +1,7 @@
 from app.models.user_model import User
 from app.models.stock_model import Stock
 from app.models.fund_model import Fund
+from app.routes.main_route import plot_graph
 from flask import render_template
 from flask import Blueprint
 from flask import current_app
@@ -161,9 +162,14 @@ def funds():
         return redirect(url_for('user.mututal_funds'))
     else:
         mutual_funds = user.get_all_funds()
+        fund_holdings = user.getFundHoldings()
+        print(fund_holdings)
+        
         if not mutual_funds:
             mutual_funds = []
-        return render_template('user/user_mutualFunds.html',user_=user,mutual_funds=mutual_funds,brand_name=current_app.config['BRAND_NAME'])
+        if not fund_holdings:
+            fund_holdings = []
+        return render_template('user/user_mutualFunds.html',user_=user,mutual_funds=mutual_funds, fund_holdings=fund_holdings, brand_name=current_app.config['BRAND_NAME'])
     
 
 @usr.route('/watchlist',methods=['GET', 'POST'])
@@ -181,27 +187,49 @@ def watchlist():
             funds_data = []
         return render_template('user/user_watchlist.html',user_=user,watchlist={"stocks": stocks_data, "funds": funds_data},brand_name=current_app.config['BRAND_NAME'])
 
-@usr.route('/remove_from_watchlist/stock/<string:stock_symbol>', methods=['POST'])
+@usr.route('/remove_from_watchlist_stock', methods=['POST'])
 @login_required
 @role_required(4)
-def remove_from_watchlist_stock(stock_symbol):
-    # Logic to remove the stock from the user's watchlist
-    # Example: delete from the database
-    # watchlist.remove_stock(stock_symbol)
+def remove_from_watchlist_stock():
+    data = request.json
+    stock_symbol = data.get('stock_symbol')
+    
+    if not stock_symbol:
+        return jsonify({'status': 'error', 'message': 'Invalid stock symbol.'}), 400
 
-    flash(f'Stock {stock_symbol} removed from your watchlist.', 'success')
-    return redirect(url_for('watchlist'))
+    try:
+        user = User.get_current_user()
+        user.removeStockFromWatchlist(stock_symbol)
+        stocks_list, funds_list = user.getWatchlist()
 
-@usr.route('/remove_from_watchlist/fund/<int:fund_id>', methods=['POST'])
+        watchlist={"stocks": stocks_list, "funds": funds_list}
+
+        return jsonify({'status': 'success', 'message': f'{stock_symbol} removed from watchlist.', 'watchlist': watchlist}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@usr.route('/remove_from_watchlist_fund', methods=['POST'])
 @login_required
 @role_required(4)
-def remove_from_watchlist_fund(fund_id):
+def remove_from_watchlist_fund():
+    fund_id = request.json.get('fund_id')
+    if not fund_id:
+        return jsonify({'status': 'error', 'message': 'Invalid fund ID.'}), 400
+    
     # Logic to remove the mutual fund from the user's watchlist
     # Example: delete from the database
     # watchlist.remove_fund(fund_id)
+    try:
+        user = User.get_current_user()
+        user.removeFundFromWatchlist(fund_id)
+        stocks_list, funds_list = user.getWatchlist()
 
-    flash(f'Fund with ID {fund_id} removed from your watchlist.', 'success')
-    return redirect(url_for('watchlist'))
+        watchlist={"stocks": stocks_list, "funds": funds_list}
+
+        return jsonify({'status': 'success', 'message': f'{fund_id} removed from watchlist.', 'watchlist': watchlist}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @usr.route('/search_stocks', methods=['GET'])
 @login_required
@@ -229,7 +257,13 @@ def search_funds():
 @login_required
 @role_required(4)
 def add_stock_to_watchlist():
-    stock_symbol = request.form.get('stock_symbol')
+    data = request.get_json()
+    stock_symbol = data.get('stock_symbol')
+
+    if not stock_symbol:
+        flash('Please enter a valid stock symbol.', 'danger')
+        return jsonify({'status': 'error', 'message': 'Invalid stock symbol'}), 400
+
     # Logic to add stock to watchlist (find stock by symbol, save to DB)
     # Example:
     # #stock = find_stock_by_symbol(stock_symbol)
@@ -238,23 +272,24 @@ def add_stock_to_watchlist():
     #     flash(f'{stock_symbol} added to watchlist!', 'success')
     # else:
     #     flash(f'Stock {stock_symbol} not found.', 'danger')
-    if not stock_symbol:
-        flash('Please enter a valid stock symbol.', 'danger')
-        return redirect(url_for('user.watchlist'))
+    
     try:
         stock_symbol = stock_symbol.upper()
         user = User.get_current_user()
-        user.addStockToWatchlist(stock_symbol)
-        flash(f'Stock {stock_symbol} added to watchlist!', 'success')
+        stocks_data, funds_data = user.addStockToWatchlist(stock_symbol)
+
+        watchlist={"stocks": stocks_data, "funds": funds_data}
+        return jsonify({'status': 'success', 'watchlist': watchlist}), 200
+
     except Exception as e:
-        flash(f'Error adding stock {stock_symbol} to watchlist.', 'danger')
-    return redirect(url_for('user.watchlist'))
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @usr.route('/add_fund_to_watchlist', methods=['POST'])
 @login_required
 @role_required(4)
 def add_fund_to_watchlist():
-    fund_name = request.form.get('fund_name')
+    data = request.get_json()
+    fund_name = data.get('fund_name')
     # Logic to add fund to watchlist (find fund by name, save to DB)
     # Example:
     # fund = find_fund_by_name(fund_name)
@@ -264,15 +299,18 @@ def add_fund_to_watchlist():
     # else:
     #     flash(f'Fund {fund_name} not found.', 'danger')
     if not fund_name:
-        flash('Please enter a valid fund name.', 'danger')
-        return redirect(url_for('user.watchlist'))
+        flash('Please enter a valid Fund name.', 'danger')
+        return jsonify({'status': 'error', 'message': 'Invalid Fund Name'}), 400
+
     try:
         user = User.get_current_user()
-        user.addFundToWatchlist(fund_name)
-        flash(f'Fund {fund_name} added to watchlist!', 'success')
+        stocks_data, funds_data = user.addFundToWatchlist(fund_name)
+
+        watchlist={"stocks": stocks_data, "funds": funds_data}
+        return jsonify({'status': 'success', 'watchlist': watchlist}), 200
+    
     except Exception as e:
-        flash(f'Error adding fund {fund_name} to watchlist.', 'danger')
-    return redirect(url_for('user.watchlist'))
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 
 @usr.route('/update_dark_mode', methods=['POST'])

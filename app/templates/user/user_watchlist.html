@@ -6,7 +6,7 @@
 
     <!-- Section for Stocks -->
     <h2 class="mt-4">Stocks</h2>
-    <form action="{{ url_for('user.add_stock_to_watchlist') }}" method="POST" class="mb-3">
+    <form class="mb-3" id="add-stock-form">
         <div class="input-group">
             <input type="text" id="stock-search" class="form-control" name="stock_symbol" placeholder="Enter stock symbol (e.g., AAPL)" required>
             <button class="btn btn-primary" type="submit">Add Stock</button>
@@ -14,7 +14,7 @@
         <div id="suggestions" class="list-group"></div>
     </form>
     <div class="table-responsive">
-        <table class="table table-striped table-sm {% if user_.darkMode == 1 %}table-dark{% endif %}">
+        <table id="watchlist-table-stocks" class="table table-striped table-sm {% if user_.darkMode == 1 %}table-dark{% endif %}">
             <thead>
                 <tr>
                     <th>#</th>
@@ -32,12 +32,19 @@
                     <td>{{ stock.symbol }}</td>
                     <td>{{ stock.name }}</td>
                     <td>{{ stock.current_price }}</td>
-                    <td class="{% if stock.change > 0 %}text-success{% else %}text-danger{% endif %}">
-                        {{ stock.change }}%
-                    </td>
+                    {% if stock.change is not none and stock.change > 0 %}
+                    <td class="text-success">{{ stock.change }}%</td>
+                    {% else %}
+                    <td class="text-danger">{{ stock.change }}%</td>
+                    {% endif %}
                     <td>
-                        <a href="{{ url_for('user.remove_from_watchlist_stock', stock_symbol=stock.symbol) }}" class="text-danger"><i class="fas fa-trash-alt"></i></a>
+                        <button 
+                            class="btn btn-link text-danger remove-stock" 
+                            data-stock-symbol="{{ stock.symbol }}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </td>
+                    
                 </tr>
                 {% endfor %}
             </tbody>
@@ -50,15 +57,15 @@
 
     <!-- Section for Mutual Funds -->
     <h2 class="mt-4">Mutual Funds</h2>
-    <form action="{{ url_for('user.add_fund_to_watchlist') }}" method="POST" class="mb-3">
+    <form id="add-fund-form" class="mb-3">
         <div class="input-group">
-            <input type="text" id="search-funds" class="form-control" name="fund_name" placeholder="Enter fund name (e.g., Vanguard 500 Index Fund)" required>
-            <button class="btn btn-primary" type="submit">Add Fund</button>
+            <input type="text" id="search-funds" name="fund_name" class="form-control" placeholder="Enter fund name (e.g., Vanguard 500 Index Fund)" required>
+            <button type="submit" class="btn btn-primary">Add Fund</button>
         </div>
         <div id="funds-suggestions" class="list-group"></div>
     </form>
     <div class="table-responsive">
-        <table class="table table-striped table-sm {% if user_.darkMode == 1 %}table-dark{% endif %}">
+        <table id="watchlist-table-funds" class="table table-striped table-sm {% if user_.darkMode == 1 %}table-dark{% endif %}">
             <thead>
                 <tr>
                     <th>#</th>
@@ -74,11 +81,17 @@
                     <td>{{ loop.index }}</td>
                     <td>{{ fund.name }}</td>
                     <td>{{ fund.current_price }}</td>
-                    <td class="{% if fund.change > 0 %}text-success{% else %}text-danger{% endif %}">
-                        {{ fund.change }}%
-                    </td>
+                    {% if fund.change is not none and fund.change > 0 %}
+                    <td class="text-success">{{ fund.change }}%</td>
+                    {% else %}
+                    <td class="text-danger">{{ fund.change }}%</td>
+                    {% endif %}
                     <td>
-                        <a href="#" class="text-danger"><i class="fas fa-trash-alt"></i></a>
+                        <button 
+                            class="btn btn-link text-danger remove-fund" 
+                            data-fund-id='{{ fund.fund_id }}'>
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -89,8 +102,230 @@
     {% if watchlist.funds|length == 0 %}
         <p class="text-center">No mutual funds in your watchlist.</p>
     {% endif %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
+        // Add stock to watchlist
+        $(document).ready(function () {
+            $('#add-stock-form').on('submit', function (e) {
+                e.preventDefault();
+
+        
+                const stockSymbol = $('#stock-search').val().trim();
+                
+                if (!stockSymbol) {
+                    alert('Please enter a valid stock symbol.');
+                    return;
+                }
+                document.getElementById('stock-search').value = '';
+                $.ajax({
+                    url: "{{ url_for('user.add_stock_to_watchlist') }}",
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ stock_symbol: stockSymbol }),
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            updateWatchlistTableStocks(response.watchlist.stocks); // Update stocks table
+                        } else {
+                            alert(response.message || 'Error adding stock to watchlist.');
+                        }
+                    },
+                    error: function (xhr) {
+                        alert('An unexpected error occurred: ' + xhr.statusText);
+                    }
+                });
+            });
+        // Remove stock from watchlist
+$(document).on('click', '.remove-stock', function () {
+    const stockSymbol = $(this).data('stock-symbol');
+
+    $.ajax({
+        url: "{{ url_for('user.remove_from_watchlist_stock') }}",
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ stock_symbol: stockSymbol }),
+        success: function (response) {
+            if (response.status === 'success') {
+                updateWatchlistTableStocks(response.watchlist.stocks); // Update stocks table
+            } else {
+                alert(response.message || 'Error removing stock from watchlist.');
+            }
+        },
+        error: function (xhr) {
+            alert('An unexpected error occurred: ' + xhr.statusText);
+        }
+    });
+});
+
+// Remove fund from watchlist
+$(document).on('click', '.remove-fund', function () {
+    const fund_id = $(this).data('fund-id');
+
+    $.ajax({
+        url: "{{ url_for('user.remove_from_watchlist_fund') }}",
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ fund_id: fund_id }),
+        success: function (response) {
+            if (response.status === 'success') {
+                updateWatchlistTableFunds(response.watchlist.funds); // Update funds table
+            } else {
+                alert(response.message || 'Error removing fund from watchlist.');
+            }
+        },
+        error: function (xhr) {
+            alert('An unexpected error occurred: ' + xhr.statusText);
+        }
+    });
+});
+            function updateWatchlistTableStocks(stocks) {
+                const tableBody = $('#watchlist-table-stocks tbody');
+                tableBody.empty(); // Clear the existing rows
+        
+                stocks.forEach((stock, index) => {
+                    // Determine the CSS class for the change column
+                    const changeClass = stock.change && stock.change > 0 ? 'text-success' : 'text-danger';
+                    const changeValue = stock.change !== null ? `${stock.change}%` : 'N/A';
+            
+                    // Create the table row
+                    const row = `
+                        <tr id="stock-${stock.stock_id}">
+                            <td>${index + 1}</td>
+                            <td>${stock.symbol}</td>
+                            <td>${stock.name}</td>
+                            <td>${stock.current_price || 'N/A'}</td>
+                            <td class="${changeClass}">${changeValue}</td>
+                            <td>
+                                <button 
+                                    class="btn btn-link text-danger remove-stock" 
+                                    data-stock-symbol="${stock.symbol}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
+                });
+            }
+            function updateWatchlistTableFunds(funds) {
+                const tableBody = $('#watchlist-table-funds tbody');
+                tableBody.empty(); // Clear the existing rows
+        
+                funds.forEach((fund, index) => {
+                    const changeClass = fund.change && fund.change > 0 ? 'text-success' : 'text-danger';
+                    const changeValue = fund.change !== null ? `${fund.change}%` : 'N/A';
+                    const row = `
+                        <tr id="fund-${index}">
+                            <td>${index + 1}</td>
+                            <td>${fund.name}</td>
+                            <td>${fund.current_price || 'N/A'}</td>
+                            <td class="${changeClass}">${changeValue}</td>
+                            <td>
+                                <button 
+                                    class="btn btn-link text-danger remove-fund" 
+                                    data-fund-id="${fund.fund_id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
+                });
+            }
+        });
+        
+// Add mutual fund to watchlist
+$(document).ready(function () {
+    $('#add-fund-form').on('submit', function (e) {
+        e.preventDefault();
+
+        const fundName = $('#search-funds').val().trim();
+
+        if (!fundName) {
+            alert('Please enter a valid fund name.');
+            return;
+        }
+
+        document.getElementById('search-funds').value = '';
+        $.ajax({
+            url: "{{ url_for('user.add_fund_to_watchlist') }}",
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ fund_name: fundName }),
+            success: function (response) {
+                if (response.status === 'success') {
+                    updateWatchlistTableFunds(response.watchlist.funds); // Update funds table
+                } else {
+                    alert(response.message || 'Error adding fund to watchlist.');
+                }
+            },
+            error: function (xhr) {
+                alert('An unexpected error occurred: ' + xhr.statusText);
+            }
+        });
+    });
+
+    // Update stocks table
+    function updateWatchlistTableStocks(stocks) {
+        const tableBody = $('#watchlist-table-stocks tbody');
+        tableBody.empty(); // Clear the existing rows
+
+        stocks.forEach((stock, index) => {
+            // Determine the CSS class for the change column
+            const changeClass = stock.change && stock.change > 0 ? 'text-success' : 'text-danger';
+            const changeValue = stock.change !== null ? `${stock.change}%` : 'N/A';
+    
+            // Create the table row
+            const row = `
+                <tr id="stock-${stock.stock_id}">
+                    <td>${index + 1}</td>
+                    <td>${stock.symbol}</td>
+                    <td>${stock.name}</td>
+                    <td>${stock.current_price || 'N/A'}</td>
+                    <td class="${changeClass}">${changeValue}</td>
+                    <td>
+                        <button 
+                            class="btn btn-link text-danger remove-stock" 
+                            data-stock-symbol="${stock.symbol}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tableBody.append(row);
+        });
+    }
+
+
+    function updateWatchlistTableFunds(funds) {
+        const tableBody = $('#watchlist-table-funds tbody');
+        tableBody.empty(); // Clear the existing rows
+
+        funds.forEach((fund, index) => {
+            const changeClass = fund.change && fund.change > 0 ? 'text-success' : 'text-danger';
+            const changeValue = fund.change !== null ? `${fund.change}%` : 'N/A';
+            const row = `
+                <tr id="fund-${index}">
+                    <td>${index + 1}</td>
+                    <td>${fund.name}</td>
+                    <td>${fund.current_price || 'N/A'}</td>
+                    <td class="${changeClass}">${changeValue}</td>
+                    <td>
+                        <button 
+                            class="btn btn-link text-danger remove-fund" 
+                            data-fund-id="${fund.fund_id}">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tableBody.append(row);
+        });
+    }
+});
+       
+
+
         document.getElementById('stock-search').addEventListener('input', function() {
             const query = this.value;
             const stock_url = '{{ url_for('user.search_stocks' )}}';
@@ -140,5 +375,6 @@
                 document.getElementById('funds-suggestions').innerHTML = '';  // Clear suggestions if input is less than 3 characters
             }
         });
+
     </script>
 {% endblock %}

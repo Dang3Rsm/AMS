@@ -217,7 +217,8 @@ class User:
                     change = round(change, 2) if change is not None else None
 
                 fund_list.append(
-                    {
+                    {   
+                        "fund_id": fund['fund_id'],
                         "name": fund['name'],
                         "current_price": current_price,
                         "pnl": pnl,
@@ -235,15 +236,16 @@ class User:
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT stock_id FROM stock WHERE stock_symbol = %s"
+            query = "SELECT id FROM nasdaq_listed_equities WHERE symbol = %s"
             cursor.execute(query, (stock_symbol,))
             stock = cursor.fetchone()
             if stock:
-                stock_id = stock["stock_id"]
+                stock_id = stock["id"]
                 query = "INSERT INTO watchlist (user_id, stock_id) VALUES (%s, %s)"
                 cursor.execute(query, (self.user_id, stock_id))
                 conn.commit()
-                return True
+                data = self.getWatchlist()
+                return data
             else:
                 return False
         except Exception as e:
@@ -254,7 +256,7 @@ class User:
         conn = get_db_connection()
         try:
             cursor = conn.cursor()
-            query = "SELECT fund_id FROM fund WHERE fund_name = %s"
+            query = "SELECT fund_id FROM funds WHERE fund_name = %s"
             cursor.execute(query, (fund_name,))
             fund = cursor.fetchone()
             if fund:
@@ -262,13 +264,50 @@ class User:
                 query = "INSERT INTO watchlist (user_id, fund_id) VALUES (%s, %s)"
                 cursor.execute(query, (self.user_id, fund_id))
                 conn.commit()
-                return True
+                data = self.getWatchlist()
+                return data
             else:
                 return False
         except Exception as e:
             print(f"Error at addFundToWatchlist(): {e}")
             return False
-        
+    def removeStockFromWatchlist(self, stock_symbol):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            query = "SELECT id FROM nasdaq_listed_equities WHERE symbol = %s"
+            cursor.execute(query, (stock_symbol,))
+            stock = cursor.fetchone()
+            if stock:
+                stock_id = stock["id"]
+                query = "DELETE FROM watchlist WHERE user_id = %s AND stock_id = %s"
+                cursor.execute(query, (self.user_id, stock_id))
+                conn.commit()
+                data = self.getWatchlist()
+                return data
+            else:
+                return False
+        except Exception as e:
+            print(f"Error at removeStockFromWatchlist(): {e}")
+            return False
+    def removeFundFromWatchlist(self, fund_id):
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor()
+            if fund_id:
+                # Delete the fund from the user's watchlist
+                query = "DELETE FROM watchlist WHERE user_id = %s AND fund_id = %s"
+                cursor.execute(query, (self.user_id, fund_id))
+                conn.commit()
+                # Return the updated watchlist data
+                data = self.getWatchlist()
+                return data
+            else:
+                return False
+        except Exception as e:
+            print(f"Error at removeFundFromWatchlist(): {e}")
+            return False
+
     def register_user_created_by(self,user_id):
         conn = get_db_connection()
         try:

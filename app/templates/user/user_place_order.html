@@ -59,7 +59,7 @@
                 <td>{{ stock.symbol }}</td>
                 <td>{{ stock.name }}</td>
                 <td>{{ stock.current_price }}</td>
-                <td class="{% if stock.change > 0 %}text-success{% else %}text-danger{% endif %}">
+                <td>
                     {{ stock.change }}%
                 </td>
             </tr>
