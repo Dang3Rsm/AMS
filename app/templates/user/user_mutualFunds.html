@@ -4,9 +4,10 @@
     <h1 class="mt-3">Mutual Funds</h1>
 
     <div class="row">
+        
         {% for fund in mutual_funds %}
         <div class="col-md-6 mb-4">
-            <div class="card shadow-sm {% if user_.darkMode == 1 %}bg-dark text-white{% else %}bg-light{% endif %}">
+            <div class="card shadow-sm fund-card {% if user_.darkMode == 1 %}bg-dark text-white{% else %}bg-light{% endif %}" data-fund-name="{{ fund.fund_name }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ fund.fund_name }}</h5>
                     <p class="card-text">
@@ -16,12 +17,8 @@
                             {{ fund.change if fund.change is not none else 'N/A' }}%
                         </span>                        
                     </p>                    
-                    <form action="{{ url_for('user.add_fund_to_watchlist') }}" method="POST"> 
-                         <input type="hidden" name="fund_name" value="{{ fund.fund_name }}"> 
-                         <button type="submit" class="btn btn-primary"> 
-                             Add to Watchlist 
-                         </button> 
-                     </form> 
+                    
+                    <button class="btn watchlist-btn">Add to Watchlist</button>
                     <!-- BUY BUTTON -->
                     <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#buyModal{{ fund.fund_id }}">
                         <i class="fas fa-arrow-up"></i> Buy
@@ -84,4 +81,70 @@
     {% if mutual_funds|length == 0 %}
         <p class="text-center">No mutual funds available at the moment.</p>
     {% endif %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Get fund holdings from a hidden field or directly from the backend-rendered data
+            const userWatchlistFunds = JSON.parse($('#user-fund-holdings').val() || '[]');
+            
+            // Initialize the buttons based on user's watchlist
+            function initializeWatchlistButtons() {
+                $('.fund-card').each(function () {
+                    const fundName = $(this).data('fund-name');
+                    const button = $(this).find('.watchlist-btn');
+        
+                    if (userWatchlistFunds.includes(fundName)) {
+                        button.text('Remove from Watchlist').addClass('btn-danger').removeClass('btn-primary');
+                    } else {
+                        button.text('Add to Watchlist').addClass('btn-primary').removeClass('btn-danger');
+                    }
+                });
+            }
+        
+            // Toggle fund in watchlist
+            $('.watchlist-btn').on('click', function (e) {
+                e.preventDefault();
+                const button = $(this);
+                const fundCard = button.closest('.fund-card');
+                const fundId = fundCard.data('fund-id');
+                const fundName = fundCard.data('fund-name');
+                console.log(fundName);
+        
+                const isAdding = !userWatchlistFunds.includes(fundName);
+                const url = isAdding
+                    ? "{{ url_for('user.add_fund_to_watchlist') }}"
+                    : "{{ url_for('user.remove_from_watchlist_fund') }}";
+        
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ fund_name: fundName }),
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            if (isAdding) {
+                                userWatchlistFunds.push(fundId);
+                            } else {
+                                const index = userWatchlistFunds.indexOf(fundId);
+                                if (index !== -1) {
+                                    userWatchlistFunds.splice(index, 1);
+                                }
+                            }
+                            initializeWatchlistButtons(); // Update button states
+                        } else {
+                            alert(response.message || 'Error updating watchlist.');
+                        }
+                    },
+                    error: function (xhr) {
+                        alert('An unexpected error occurred: ' + xhr.statusText);
+                    }
+                });
+            });
+        
+            // Call this on page load to initialize buttons
+            initializeWatchlistButtons();
+        });
+        
+    </script>
 {% endblock %}
