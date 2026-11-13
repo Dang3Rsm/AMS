@@ -1,0 +1,117 @@
+{% extends "user/user_dashboardLayout.html" %}
+
+{% block content %}
+    <h1 class="mt-3">Account Settings</h1>
+
+    <div class="row mt-4">
+        <!-- Preferences Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card p-3 shadow-sm {% if user_.darkMode == 1 %}bg-dark text-white border-secondary{% endif %}">
+                <h4>Preferences</h4>
+                <hr>
+                <!-- Dark Mode Toggle Form -->
+                <form id="theme-form" action="{{ url_for('user.update_dark_mode') }}" method="POST" class="mb-3">
+                    <label for="dark_mode" class="form-label fw-bold">Theme</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="dark_mode" name="theme" 
+                               value="1" {% if user_.darkMode == 1 %}checked{% endif %}>
+                        <label class="form-check-label" id="dark_mode_label" for="dark_mode">
+                            {% if user_.darkMode == 1 %}
+                                Dark Mode Enabled
+                            {% else %}
+                                Light Mode Enabled
+                            {% endif %}
+                        </label>
+                    </div>
+                </form>
+
+                <!-- Notifications Toggle Form -->
+                <form id="notif-form" action="{{ url_for('user.update_notifications') }}" method="POST" class="mb-2">
+                    <label for="notifications" class="form-label fw-bold">Platform Notifications</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="notifications" name="notifications" 
+                               value="enabled" {% if user_.notifications == 'enabled' %}checked{% endif %}>
+                        <label class="form-check-label" id="notifications_label" for="notifications">
+                            {% if user_.notifications == 'enabled' %}
+                                Notifications Enabled
+                            {% else %}
+                                Notifications Disabled
+                            {% endif %}
+                        </label>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Security Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card p-3 shadow-sm {% if user_.darkMode == 1 %}bg-dark text-white border-secondary{% endif %}">
+                <h4>Security &amp; Password</h4>
+                <hr>
+                <form action="{{ url_for('user.change_password') }}" method="POST">
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password" placeholder="Enter current password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Enter new password (min. 6 characters)" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm new password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const darkToggle = document.getElementById('dark_mode');
+            const darkLabel = document.getElementById('dark_mode_label');
+            const notifToggle = document.getElementById('notifications');
+            const notifLabel = document.getElementById('notifications_label');
+
+            if (darkToggle) {
+                darkToggle.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    darkLabel.textContent = isChecked ? 'Dark Mode Enabled' : 'Light Mode Enabled';
+                    document.body.classList.toggle('dark-mode', isChecked);
+
+                    const formData = new FormData();
+                    if (isChecked) {
+                        formData.append('theme', '1');
+                    }
+                    fetch("{{ url_for('user.update_dark_mode') }}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    }).catch(function() {
+                        document.getElementById('theme-form').submit();
+                    });
+                });
+            }
+
+            if (notifToggle) {
+                notifToggle.addEventListener('change', function() {
+                    const isChecked = this.checked;
+                    notifLabel.textContent = isChecked ? 'Notifications Enabled' : 'Notifications Disabled';
+
+                    const formData = new FormData();
+                    if (isChecked) {
+                        formData.append('notifications', 'enabled');
+                    }
+                    fetch("{{ url_for('user.update_notifications') }}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    }).catch(function() {
+                        document.getElementById('notif-form').submit();
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}

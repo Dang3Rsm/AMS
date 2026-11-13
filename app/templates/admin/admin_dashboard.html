@@ -1,0 +1,45 @@
+{% extends "admin/admin_dashboardLayout.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Welcome, {{ admin_.first_name }}!</h2>
+            <p>This is your dashboard.</p>
+
+            <!-- Example statistics section -->
+            <div class="row">
+                <div class="col-lg-6 col-md-8">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Users</h5>
+                            <p class="card-text">Total Users {{ count["total"] }}</p>
+                            <p class="card-text">Active Users {{ count["active"] }}</p>
+                            <p class="card-text">Inactive Users {{ count["inactive"] }}</p>
+                            <!-- <a href="#" class="btn btn-light">View Profile</a> -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-8">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Activity Log</h5>
+                            <p class="card-text">Track recent administrative activities.</p>
+                            <a href="{{ url_for('admin.notifs') }}" class="btn btn-light">View Activity</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-8">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Platform Reports</h5>
+                            <p class="card-text">View financial and trading reports.</p>
+                            <a href="{{ url_for('admin.reports') }}" class="btn btn-light">View Reports</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "user/user_dashboardLayout.html" %}
+{% block content %}
+<h1 class="mt-3">Holdings</h1>
+<h2 class="mt-4">Stocks</h2>
+<div class="table-responsive mt-3">
+    <table class="table table-striped {% if user_.darkMode == 1 %}table-dark{% endif %}">
+        <thead>
+            <tr>
+                <th>Exchange</th>
+                <th>Symbol</th>
+                <th>Company</th>
+                <th>Quantity</th>
+                <th>Average Price</th>
+                <th>Current Price</th>
+                <th>Total P/L ($)</th>
+                <th>% Change</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for holding in holdings.stocks %}
+            <tr>
+                <td>NASDAQ</td>
+                <td><strong>{{ holding.symbol }}</strong></td>
+                <td>{{ holding.name }}</td>
+                <td>{{ holding.quantity }}</td>
+                <td>${{ holding.average_price }}</td>
+                <td>${{ holding.current_price }}</td>
+                <td class="{% if holding.pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    ${{ holding.pnl }}
+                </td>
+                <td class="{% if holding.change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ holding.change }}%
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No stocks held.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h2 class="mt-4">Mutual Funds</h2>
+<div class="table-responsive mt-3">
+    <table class="table table-striped {% if user_.darkMode == 1 %}table-dark{% endif %}">
+        <thead>
+            <tr>
+                <th>Fund Name</th>
+                <th>Theme</th>
+                <th>Units</th>
+                <th>Average NAV</th>
+                <th>Current NAV</th>
+                <th>Total P/L ($)</th>
+                <th>% Change</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for holding in holdings.mutualFunds %}
+            <tr>
+                <td><strong>{{ holding.fund_name }}</strong></td>
+                <td>{{ holding.fund_theme }}</td>
+                <td>{{ holding.quantity }}</td>
+                <td>${{ holding.average_price }}</td>
+                <td>${{ holding.current_price }}</td>
+                <td class="{% if holding.pnl >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    ${{ holding.pnl }}
+                </td>
+                <td class="{% if holding.change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ holding.change }}%
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No mutual funds held.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

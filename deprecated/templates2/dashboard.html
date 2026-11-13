@@ -1,0 +1,101 @@
+{% extends indexlayout.html %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block body%}
+<h1>Asset Management System</h1>
+
+    <!-- User Information Section -->
+    <section id="user_info">
+        <h2>User Information</h2>
+        <p><strong>Name:</strong> John Doe</p> <!-- Replace with dynamic data -->
+        <p><strong>Email:</strong> johndoe@example.com</p> <!-- Replace with dynamic data -->
+        <p><strong>Portfolio:</strong> <a href="https://example.com/portfolio" target="_blank">View Portfolio</a></p> <!-- Replace with actual portfolio link -->
+    </section>
+
+    <hr>
+
+    <!-- Asset Details Section -->
+    <section id="assets">
+        <h2>Your Assets</h2>
+        <table border="1" cellpadding="10">
+            <thead>
+                <tr>
+                    <th>Asset Name</th>
+                    <th>Asset Type</th>
+                    <th>Asset Description</th>
+                    <th>Value (USD)</th>
+                    <th>Purchase Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Asset 1 -->
+                <tr>
+                    <td>Asset 1</td>
+                    <td>Real Estate</td>
+                    <td>2-bedroom apartment in New York</td>
+                    <td>$500,000</td>
+                    <td>2021-06-15</td>
+                </tr>
+                <!-- Asset 2 -->
+                <tr>
+                    <td>Asset 2</td>
+                    <td>Stocks</td>
+                    <td>50 shares of Apple Inc.</td>
+                    <td>$8,000</td>
+                    <td>2022-03-20</td>
+                </tr>
+                <!-- Asset 3 -->
+                <tr>
+                    <td>Asset 3</td>
+                    <td>Cryptocurrency</td>
+                    <td>2 Bitcoin</td>
+                    <td>$60,000</td>
+                    <td>2023-01-10</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <hr>
+
+    <!-- Add New Asset Form -->
+    <section id="add_asset">
+        <h2>Add a New Asset</h2>
+        <form action="/addAsset" method="POST">
+            <label for="asset_name">Asset Name:</label><br>
+            <input type="text" id="asset_name" name="asset_name" required><br><br>
+
+            <label for="asset_type">Asset Type:</label><br>
+            <select id="asset_type" name="asset_type" required>
+                <option value="real_estate">Real Estate</option>
+                <option value="stocks">Stocks</option>
+                <option value="cryptocurrency">Cryptocurrency</option>
+                <option value="other">Other</option>
+            </select><br><br>
+
+            <label for="asset_description">Asset Description:</label><br>
+            <textarea id="asset_description" name="asset_description" required></textarea><br><br>
+
+            <label for="asset_value">Value (USD):</label><br>
+            <input type="number" id="asset_value" name="asset_value" required><br><br>
+
+            <label for="purchase_date">Purchase Date:</label><br>
+            <input type="date" id="purchase_date" name="purchase_date" required><br><br>
+
+            <input type="submit" value="Add Asset">
+        </form>
+    </section>
+
+    <hr>
+
+     <!-- Total Asset Value Section -->
+     <section id="total_value">
+        <h2>Total Asset Value</h2>
+        <p><strong>Total Value of Assets:</strong> $568,000</p> <!-- Replace with dynamic calculation -->
+    </section>
+
+    
+{% endblock %}

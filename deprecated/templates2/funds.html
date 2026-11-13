@@ -1,0 +1,37 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+funds
+{% endblock %}
+
+{% block body %}
+
+  <header>
+        <h1>Funds Table</h1>
+    </header>
+
+    <section id="funds_table">
+        <h2>Funds</h2>
+        <table border="1" cellpadding="10">
+            <thead>
+                <tr>
+                    <th>Fund ID</th>
+                    <th>Fund Name</th>
+                    <th>Description</th>
+                    <th>Value (USD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Fund Data Example -->
+                <tr>
+                    <td>1</td>
+                    <td>Growth Fund</td>
+                    <td>A fund focusing on capital growth</td>
+                    <td>$1,000,000</td>
+                </tr>
+                <!-- Add more funds as needed -->
+            </tbody>
+        </table>
+    </section>
+
+
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+fund price history
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>Fund Price History Table</h1>
+</header>
+
+<section id="fund_price_history_table">
+    <h2>Fund Price History</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Fund ID</th>
+                <th>Date</th>
+                <th>Price (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Fund Price Data Example -->
+            <tr>
+                <td>1</td>
+                <td>2024-09-15</td>
+                <td>$100.00</td>
+            </tr>
+            <!-- Add more fund price history as needed -->
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}

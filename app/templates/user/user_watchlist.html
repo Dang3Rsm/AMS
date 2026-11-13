@@ -1,0 +1,356 @@
+{% extends "user/user_dashboardLayout.html" %}
+
+{% block content %}
+    <h1 class="mt-3">Watchlist</h1>
+
+    <!-- Section for Stocks -->
+    <h2 class="mt-4">Stocks</h2>
+    <form class="mb-3 position-relative" id="add-stock-form" autocomplete="off">
+        <div class="input-group">
+            <input type="text" id="stock-search" class="form-control" name="stock_symbol" placeholder="Search by ticker or company (e.g., AAPL, NVDA, TSLA, ETH-USD)" required>
+            <button class="btn btn-primary" type="submit" id="add-stock-btn">
+                <i class="fas fa-plus"></i> Add Stock
+            </button>
+        </div>
+        <div id="suggestions" class="list-group position-absolute w-100 shadow" style="z-index: 1050; max-height: 250px; overflow-y: auto;"></div>
+    </form>
+
+    <div class="table-responsive">
+        <table id="watchlist-table-stocks" class="table table-striped table-sm {% if user_.darkMode == 1 %}table-dark{% endif %}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Stock Symbol</th>
+                    <th>Company Name</th>
+                    <th>Current Price</th>
+                    <th>Change</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in watchlist.stocks %}
+                <tr id="stock-{{ stock.stock_id }}">
+                    <td>{{ loop.index }}</td>
+                    <td><strong>{{ stock.symbol }}</strong></td>
+                    <td>{{ stock.name }}</td>
+                    <td>${{ "%.2f"|format(stock.current_price|float) if stock.current_price is not none else 'N/A' }}</td>
+                    {% if stock.change is not none and stock.change >= 0 %}
+                    <td class="text-success">+{{ stock.change }}%</td>
+                    {% else %}
+                    <td class="text-danger">{{ stock.change }}%</td>
+                    {% endif %}
+                    <td>
+                        <button 
+                            class="btn btn-link text-danger remove-stock p-0" 
+                            data-stock-symbol="{{ stock.symbol }}" title="Remove">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p id="no-stocks-msg" class="text-center text-muted {% if watchlist.stocks|length > 0 %}d-none{% endif %}">No stocks in your watchlist.</p>
+
+    <!-- Section for Mutual Funds -->
+    <h2 class="mt-4">Mutual Funds</h2>
+    <form id="add-fund-form" class="mb-3 position-relative" autocomplete="off">
+        <div class="input-group">
+            <input type="text" id="search-funds" name="fund_name" class="form-control" placeholder="Search mutual fund (e.g., AI Innovation Fund)" required>
+            <button type="submit" class="btn btn-primary" id="add-fund-btn">
+                <i class="fas fa-plus"></i> Add Fund
+            </button>
+        </div>
+        <div id="funds-suggestions" class="list-group position-absolute w-100 shadow" style="z-index: 1050; max-height: 250px; overflow-y: auto;"></div>
+    </form>
+
+    <div class="table-responsive">
+        <table id="watchlist-table-funds" class="table table-striped table-sm {% if user_.darkMode == 1 %}table-dark{% endif %}">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Fund Name</th>
+                    <th>Current Net Asset Value (NAV)</th>
+                    <th>Change</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fund in watchlist.funds %}
+                <tr id="fund-{{ loop.index }}">
+                    <td>{{ loop.index }}</td>
+                    <td><strong>{{ fund.name }}</strong></td>
+                    <td>${{ "%.2f"|format(fund.current_price|float) if fund.current_price is not none else 'N/A' }}</td>
+                    {% if fund.change is not none and fund.change >= 0 %}
+                    <td class="text-success">+{{ fund.change }}%</td>
+                    {% else %}
+                    <td class="text-danger">{{ fund.change }}%</td>
+                    {% endif %}
+                    <td>
+                        <button 
+                            class="btn btn-link text-danger remove-fund p-0" 
+                            data-fund-id='{{ fund.fund_id }}' title="Remove">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p id="no-funds-msg" class="text-center text-muted {% if watchlist.funds|length > 0 %}d-none{% endif %}">No mutual funds in your watchlist.</p>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const stockUrl = "{{ url_for('user.search_stocks') }}";
+            const fundsUrl = "{{ url_for('user.search_funds') }}";
+            let stockDebounceTimer = null;
+            let fundDebounceTimer = null;
+
+            // Stock Autocomplete with yfinance and NASDAQ search
+            $('#stock-search').on('input', function() {
+                const query = $(this).val().trim();
+                clearTimeout(stockDebounceTimer);
+                if (query.length >= 1) {
+                    stockDebounceTimer = setTimeout(function() {
+                        $.getJSON(`${stockUrl}?query=${encodeURIComponent(query)}`, function(data) {
+                            const suggestions = $('#suggestions');
+                            suggestions.empty();
+                            if (data && data.length > 0) {
+                                data.forEach(stock => {
+                                    const item = $(`
+                                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <span><strong>${stock.symbol}</strong> &mdash; ${stock.name}</span>
+                                            <span class="badge bg-secondary">${stock.sector || 'Ticker'}</span>
+                                        </a>
+                                    `);
+                                    item.on('click', function(e) {
+                                        e.preventDefault();
+                                        $('#stock-search').val(stock.symbol);
+                                        suggestions.empty();
+                                    });
+                                    suggestions.append(item);
+                                });
+                            }
+                        });
+                    }, 250);
+                } else {
+                    $('#suggestions').empty();
+                }
+            });
+
+            // Funds Autocomplete
+            $('#search-funds').on('input', function() {
+                const query = $(this).val().trim();
+                clearTimeout(fundDebounceTimer);
+                if (query.length >= 1) {
+                    fundDebounceTimer = setTimeout(function() {
+                        $.getJSON(`${fundsUrl}?query=${encodeURIComponent(query)}`, function(data) {
+                            const suggestions = $('#funds-suggestions');
+                            suggestions.empty();
+                            if (data && data.length > 0) {
+                                data.forEach(fund => {
+                                    const item = $(`
+                                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <span><strong>${fund.fund_name}</strong></span>
+                                            <span class="badge bg-info text-dark">${fund.fund_theme || 'Fund'}</span>
+                                        </a>
+                                    `);
+                                    item.on('click', function(e) {
+                                        e.preventDefault();
+                                        $('#search-funds').val(fund.fund_name);
+                                        suggestions.empty();
+                                    });
+                                    suggestions.append(item);
+                                });
+                            }
+                        });
+                    }, 250);
+                } else {
+                    $('#funds-suggestions').empty();
+                }
+            });
+
+            // Close suggestions on outside click
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#add-stock-form').length) {
+                    $('#suggestions').empty();
+                }
+                if (!$(e.target).closest('#add-fund-form').length) {
+                    $('#funds-suggestions').empty();
+                }
+            });
+
+            // Add Stock Form Submit
+            $('#add-stock-form').on('submit', function (e) {
+                e.preventDefault();
+                const stockSymbol = $('#stock-search').val().trim();
+                if (!stockSymbol) return;
+
+                const btn = $('#add-stock-btn');
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> Adding...');
+                $('#suggestions').empty();
+
+                $.ajax({
+                    url: "{{ url_for('user.add_stock_to_watchlist') }}",
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ stock_symbol: stockSymbol }),
+                    success: function (response) {
+                        $('#stock-search').val('');
+                        if (response.status === 'success' && response.watchlist) {
+                            updateWatchlistTableStocks(response.watchlist.stocks);
+                        } else {
+                            alert(response.message || 'Error adding stock.');
+                        }
+                    },
+                    error: function (xhr) {
+                        const err = xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText;
+                        alert('Could not add ticker: ' + err);
+                    },
+                    complete: function() {
+                        btn.prop('disabled', false).html('<i class="fas fa-plus"></i> Add Stock');
+                    }
+                });
+            });
+
+            // Add Fund Form Submit
+            $('#add-fund-form').on('submit', function (e) {
+                e.preventDefault();
+                const fundName = $('#search-funds').val().trim();
+                if (!fundName) return;
+
+                const btn = $('#add-fund-btn');
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> Adding...');
+                $('#funds-suggestions').empty();
+
+                $.ajax({
+                    url: "{{ url_for('user.add_fund_to_watchlist') }}",
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ fund_name: fundName }),
+                    success: function (response) {
+                        $('#search-funds').val('');
+                        if (response.status === 'success' && response.watchlist) {
+                            updateWatchlistTableFunds(response.watchlist.funds);
+                        } else {
+                            alert(response.message || 'Error adding fund.');
+                        }
+                    },
+                    error: function (xhr) {
+                        const err = xhr.responseJSON ? xhr.responseJSON.message : xhr.statusText;
+                        alert('Could not add fund: ' + err);
+                    },
+                    complete: function() {
+                        btn.prop('disabled', false).html('<i class="fas fa-plus"></i> Add Fund');
+                    }
+                });
+            });
+
+            // Remove Stock
+            $(document).on('click', '.remove-stock', function () {
+                const stockSymbol = $(this).data('stock-symbol');
+                if (!confirm(`Remove ${stockSymbol} from watchlist?`)) return;
+
+                $.ajax({
+                    url: "{{ url_for('user.remove_from_watchlist_stock') }}",
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ stock_symbol: stockSymbol }),
+                    success: function (response) {
+                        if (response.status === 'success' && response.watchlist) {
+                            updateWatchlistTableStocks(response.watchlist.stocks);
+                        }
+                    }
+                });
+            });
+
+            // Remove Fund
+            $(document).on('click', '.remove-fund', function () {
+                const fundId = $(this).data('fund-id');
+                if (!confirm('Remove mutual fund from watchlist?')) return;
+
+                $.ajax({
+                    url: "{{ url_for('user.remove_from_watchlist_fund') }}",
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ fund_id: fundId }),
+                    success: function (response) {
+                        if (response.status === 'success' && response.watchlist) {
+                            updateWatchlistTableFunds(response.watchlist.funds);
+                        }
+                    }
+                });
+            });
+
+            function updateWatchlistTableStocks(stocks) {
+                const tbody = $('#watchlist-table-stocks tbody');
+                tbody.empty();
+                if (!stocks || stocks.length === 0) {
+                    $('#no-stocks-msg').removeClass('d-none');
+                    return;
+                }
+                $('#no-stocks-msg').addClass('d-none');
+
+                stocks.forEach((stock, index) => {
+                    const isPositive = stock.change !== null && stock.change >= 0;
+                    const changeClass = isPositive ? 'text-success' : 'text-danger';
+                    const changeText = stock.change !== null ? (isPositive ? `+${stock.change}%` : `${stock.change}%`) : 'N/A';
+                    const priceText = stock.current_price !== null ? `$${parseFloat(stock.current_price).toFixed(2)}` : 'N/A';
+
+                    const row = `
+                        <tr id="stock-${stock.stock_id}">
+                            <td>${index + 1}</td>
+                            <td><strong>${stock.symbol}</strong></td>
+                            <td>${stock.name}</td>
+                            <td>${priceText}</td>
+                            <td class="${changeClass}">${changeText}</td>
+                            <td>
+                                <button class="btn btn-link text-danger remove-stock p-0" data-stock-symbol="${stock.symbol}" title="Remove">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            }
+
+            function updateWatchlistTableFunds(funds) {
+                const tbody = $('#watchlist-table-funds tbody');
+                tbody.empty();
+                if (!funds || funds.length === 0) {
+                    $('#no-funds-msg').removeClass('d-none');
+                    return;
+                }
+                $('#no-funds-msg').addClass('d-none');
+
+                funds.forEach((fund, index) => {
+                    const isPositive = fund.change !== null && fund.change >= 0;
+                    const changeClass = isPositive ? 'text-success' : 'text-danger';
+                    const changeText = fund.change !== null ? (isPositive ? `+${fund.change}%` : `${fund.change}%`) : 'N/A';
+                    const priceText = fund.current_price !== null ? `$${parseFloat(fund.current_price).toFixed(2)}` : 'N/A';
+
+                    const row = `
+                        <tr id="fund-${index}">
+                            <td>${index + 1}</td>
+                            <td><strong>${fund.name}</strong></td>
+                            <td>${priceText}</td>
+                            <td class="${changeClass}">${changeText}</td>
+                            <td>
+                                <button class="btn btn-link text-danger remove-fund p-0" data-fund-id="${fund.fund_id}" title="Remove">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            }
+        });
+    </script>
+{% endblock %}

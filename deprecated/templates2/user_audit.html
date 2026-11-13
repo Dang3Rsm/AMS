@@ -1,0 +1,36 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+user audit
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>User Audit Table</h1>
+</header>
+
+<section id="user_audit_table">
+    <h2>User Audit</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Audit ID</th>
+                <th>User ID</th>
+                <th>Action</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- User Audit Data Example -->
+            <tr>
+                <td>1</td>
+                <td>1</td>
+                <td>Login</td>
+                <td>2024-09-15 08:30:00</td>
+            </tr>
+            <!-- Add more user audit records as needed -->
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "admin/admin_dashboardLayout.html" %}
+{% block content %}
+<div class="container mt-3">
+    <h1>Platform Financial &amp; Order Reports</h1>
+    <div class="row g-3 mt-2">
+        <div class="col-md-6">
+            <div class="card bg-primary text-white p-3">
+                <h5>Equity Trading Volume</h5>
+                <h3>${{ report.equity_volume }}</h3>
+                <p class="mb-0">Total Executed Equity Trades: {{ report.equity_tx_count }}</p>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-success text-white p-3">
+                <h5>Mutual Fund Volume</h5>
+                <h3>${{ report.fund_volume }}</h3>
+                <p class="mb-0">Total Executed Fund Trades: {{ report.fund_tx_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Order Status Breakdown</h3>
+    <table class="table table-striped mt-2 {% if admin_.darkMode == 1 %}table-dark{% endif %}">
+        <thead>
+            <tr>
+                <th>Order Status</th>
+                <th>Total Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in report.orders %}
+            <tr>
+                <td><strong>{{ row.status }}</strong></td>
+                <td>{{ row.cnt }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2">No orders recorded yet.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

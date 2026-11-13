@@ -1,0 +1,141 @@
+{% extends "user/user_dashboardLayout.html" %}
+{% block content %}
+<h1 class="mt-3">Mutual Funds</h1>
+<input type="hidden" id="user-fund-holdings" value='{{ watched_names | tojson }}'>
+<div class="row mt-3">
+    {% for fund in mutual_funds %}
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm fund-card {% if user_.darkMode == 1 %}bg-dark text-white border-secondary{% else %}bg-light{% endif %}"
+            data-fund-id="{{ fund.fund_id }}" data-fund-name="{{ fund.fund_name }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ fund.fund_name }}</h5>
+                <p class="card-text">
+                    <strong>Theme:</strong> {{ fund.fund_theme or 'Diversified' }}<br>
+                    <strong>Current NAV:</strong> ${{ fund.NAV }}<br>
+                    <strong>1D Return:</strong>
+                    <span
+                        class="{% if fund.change is not none and fund.change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ fund.change if fund.change is not none else '0.0' }}%
+                    </span>
+                </p>
+                <button class="btn btn-sm watchlist-btn">Add to Watchlist</button>
+                <a href="#" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                    data-bs-target="#buyModal{{ fund.fund_id }}">
+                    <i class="fas fa-arrow-up"></i> Buy
+                </a>
+                <a href="#" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                    data-bs-target="#sellModal{{ fund.fund_id }}">
+                    <i class="fas fa-arrow-down"></i> Sell
+                </a>
+
+                <!-- Buy Modal -->
+                <div class="modal fade" id="buyModal{{ fund.fund_id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content {% if user_.darkMode == 1 %}bg-dark text-white{% endif %}">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Buy {{ fund.fund_name }}</h5>
+                                <button type="button"
+                                    class="btn-close {% if user_.darkMode == 1 %}btn-close-white{% endif %}"
+                                    data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{ url_for('user.funds') }}" method="POST">
+                                    <input type="hidden" name="fund_id" value="{{ fund.fund_id }}">
+                                    <input type="hidden" name="price" value="{{ fund.NAV }}">
+                                    <input type="hidden" name="transaction_type" value="BUY">
+                                    <div class="mb-3">
+                                        <label class="form-label">Units to Buy</label>
+                                        <input type="number" class="form-control" name="quantity" min="1" value="10"
+                                            required>
+                                    </div>
+                                    <p>Execution NAV: <strong>${{ fund.NAV }}</strong></p>
+                                    <button type="submit" class="btn btn-success">Confirm Buy Order</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sell Modal -->
+                <div class="modal fade" id="sellModal{{ fund.fund_id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content {% if user_.darkMode == 1 %}bg-dark text-white{% endif %}">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Sell {{ fund.fund_name }}</h5>
+                                <button type="button"
+                                    class="btn-close {% if user_.darkMode == 1 %}btn-close-white{% endif %}"
+                                    data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="{{ url_for('user.funds') }}" method="POST">
+                                    <input type="hidden" name="fund_id" value="{{ fund.fund_id }}">
+                                    <input type="hidden" name="price" value="{{ fund.NAV }}">
+                                    <input type="hidden" name="transaction_type" value="SELL">
+                                    <div class="mb-3">
+                                        <label class="form-label">Units to Sell</label>
+                                        <input type="number" class="form-control" name="quantity" min="1" value="5"
+                                            required>
+                                    </div>
+                                    <p>Execution NAV: <strong>${{ fund.NAV }}</strong></p>
+                                    <button type="submit" class="btn btn-danger">Confirm Sell Order</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const userWatchlistFunds = JSON.parse($('#user-fund-holdings').val() || '[]');
+
+        function initializeWatchlistButtons() {
+            $('.fund-card').each(function () {
+                const fundName = $(this).data('fund-name');
+                const button = $(this).find('.watchlist-btn');
+                if (userWatchlistFunds.includes(fundName)) {
+                    button.text('Remove from Watchlist').addClass('btn-outline-danger').removeClass('btn-primary');
+                } else {
+                    button.text('Add to Watchlist').addClass('btn-primary').removeClass('btn-outline-danger');
+                }
+            });
+        }
+
+        $('.watchlist-btn').on('click', function (e) {
+            e.preventDefault();
+            const fundCard = $(this).closest('.fund-card');
+            const fundId = fundCard.data('fund-id');
+            const fundName = fundCard.data('fund-name');
+            const isAdding = !userWatchlistFunds.includes(fundName);
+            const url = isAdding
+                ? "{{ url_for('user.add_fund_to_watchlist') }}"
+                : "{{ url_for('user.remove_from_watchlist_fund') }}";
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ fund_id: fundId, fund_name: fundName }),
+                success: function (response) {
+                    if (response.status === 'success') {
+                        if (isAdding) {
+                            userWatchlistFunds.push(fundName);
+                        } else {
+                            const index = userWatchlistFunds.indexOf(fundName);
+                            if (index !== -1) userWatchlistFunds.splice(index, 1);
+                        }
+                        initializeWatchlistButtons();
+                    }
+                }
+            });
+        });
+
+        initializeWatchlistButtons();
+    });
+</script>
+{% endblock %}

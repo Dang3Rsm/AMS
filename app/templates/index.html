@@ -1,0 +1,14 @@
+{% extends "indexLayout.html" %}
+{% block title %}
+{{ brand_name }}
+{% endblock %}
+
+{% block content %}
+    <h1>Welcome to π-AMS</h1>
+    <hr>
+    <h3>Market Data</h3>
+    <hr>
+    {% for g in graph_html %}
+        <div>{{ g|safe }}</div>
+    {% endfor %}
+{% endblock %}

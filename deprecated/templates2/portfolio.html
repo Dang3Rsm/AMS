@@ -1,0 +1,148 @@
+{% extends indexlayout.html%}
+
+{% block title %}
+portfolio
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>User Portfolio</h1>
+    <p>Here you can view detailed information about your assets and manage your portfolio.</p>
+</header>
+
+ <!-- User Information Section -->
+ <section id="user_info">
+    <h2>User Information</h2>
+    <p><strong>Name:</strong> Sanidhya</p>
+    <p><strong>Email:</strong> <a href="mailto:sanidhya@example.com">sanidhya@example.com</a></p>
+    <p><strong>Contact Number:</strong> +1234567890</p>
+    <p><strong>Address:</strong> 123 Main Street, Anytown, Country</p>
+</section>
+
+ <!-- Asset Summary Section -->
+ <section id="asset_summary">
+    <h2>Asset Summary</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Asset Type</th>
+                <th>Total Value (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Real Estate</td>
+                <td>$500,000</td>
+            </tr>
+            <tr>
+                <td>Stocks</td>
+                <td>$8,000</td>
+            </tr>
+            <tr>
+                <td>Cryptocurrency</td>
+                <td>$60,000</td>
+            </tr>
+            <!-- Add more asset types and values as needed -->
+        </tbody>
+    </table>
+</section>
+
+ <!-- Detailed Assets Section -->
+ <section id="detailed_assets">
+    <h2>Detailed Asset Information</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Asset Name</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Value (USD)</th>
+                <th>Purchase Date</th>
+                <th>Current Value (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Detailed Asset 1 -->
+            <tr>
+                <td>2-bedroom Apartment</td>
+                <td>Real Estate</td>
+                <td>Located in New York</td>
+                <td>$500,000</td>
+                <td>2021-06-15</td>
+                <td>$520,000</td>
+            </tr>
+            <!-- Detailed Asset 2 -->
+            <tr>
+                <td>50 Shares of Apple Inc.</td>
+                <td>Stocks</td>
+                <td>Technology Company</td>
+                <td>$8,000</td>
+                <td>2022-03-20</td>
+                <td>$9,000</td>
+            </tr>
+            <!-- Detailed Asset 3 -->
+            <tr>
+                <td>2 Bitcoin</td>
+                <td>Cryptocurrency</td>
+                <td>Digital Currency</td>
+                <td>$60,000</td>
+                <td>2023-01-10</td>
+                <td>$64,000</td>
+            </tr>
+            <!-- Add more detailed assets as needed -->
+        </tbody>
+    </table>
+</section>
+
+ <!-- Transaction History Section -->
+ <section id="transaction_history">
+    <h2>Transaction History</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Transaction Date</th>
+                <th>Asset Name</th>
+                <th>Transaction Type</th>
+                <th>Amount (USD)</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Transaction 1 -->
+            <tr>
+                <td>2023-01-10</td>
+                <td>2 Bitcoin</td>
+                <td>Purchase</td>
+                <td>$60,000</td>
+                <td>Purchased 2 Bitcoin at $30,000 each</td>
+            </tr>
+            <!-- Transaction 2 -->
+            <tr>
+                <td>2022-03-20</td>
+                <td>50 Shares of Apple Inc.</td>
+                <td>Purchase</td>
+                <td>$8,000</td>
+                <td>Purchased 50 shares of Apple Inc. at $160 per share</td>
+            </tr>
+            <!-- Add more transactions as needed -->
+        </tbody>
+    </table>
+</section>
+
+ <!-- Performance Metrics Section -->
+ <section id="performance_metrics">
+    <h2>Asset Performance Metrics</h2>
+    <p><strong>Overall Portfolio Growth:</strong> 15% in the past year</p>
+    <p><strong>Real Estate Growth:</strong> 4% annually</p>
+    <p><strong>Stocks Growth:</strong> 12% annually</p>
+    <p><strong>Cryptocurrency Growth:</strong> 20% annually</p>
+    <!-- Add more performance metrics as needed -->
+</section>
+
+<!-- Footer Section -->
+<footer>
+    <p>© 2024 Asset Management System. All rights reserved.</p>
+</footer>
+
+{% endblock %}

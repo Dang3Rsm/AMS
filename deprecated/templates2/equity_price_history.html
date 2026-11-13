@@ -1,0 +1,36 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+equity price history
+{% endblock %}
+
+{% block body %}
+
+<section id="equity_price_history_table">
+    <h2>Equity Price History</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Ticker Symbol</th>
+                <th>Date</th>
+                <th>Open Price (USD)</th>
+                <th>Close Price (USD)</th>
+                <th>High Price (USD)</th>
+                <th>Low Price (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Equity Price Data Example -->
+            <tr>
+                <td>AAPL</td>
+                <td>2024-09-15</td>
+                <td>$145.00</td>
+                <td>$148.00</td>
+                <td>$150.00</td>
+                <td>$144.00</td>
+            </tr>
+            <!-- Add more equity price history as needed -->
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}

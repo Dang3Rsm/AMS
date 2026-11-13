@@ -1,0 +1,58 @@
+{% extends "user/user_dashboardLayout.html" %}
+{% block content %}
+<div class="container">
+    <h2 class="mb-1">Welcome back, {{ user_.first_name }}!</h2>
+    <p class="text-muted mb-4">Here is your live portfolio and trading overview.</p>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white p-3">
+                <h6>Total Portfolio Value</h6>
+                <h3>${{ summary.portfolio_value }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card {% if summary.total_pnl >= 0 %}bg-success{% else %}bg-danger{% endif %} text-white p-3">
+                <h6>Total Unrealized P&amp;L</h6>
+                <h3>${{ summary.total_pnl }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white p-3">
+                <h6>Active Positions</h6>
+                <h3>{{ summary.holdings_count }} Assets</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white p-3">
+                <h6>Total Orders</h6>
+                <h3>{{ summary.orders_count }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card p-3 h-100 {% if user_.darkMode == 1 %}bg-dark text-white border-secondary{% endif %}">
+                <h5>Profile &amp; Account</h5>
+                <p>Manage your personal information and contact details.</p>
+                <a href="{{ url_for('user.profile') }}" class="btn btn-outline-primary mt-auto">Edit Profile</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 h-100 {% if user_.darkMode == 1 %}bg-dark text-white border-secondary{% endif %}">
+                <h5>Trade Equities</h5>
+                <p>Execute instant market buy and sell orders on NASDAQ equities.</p>
+                <a href="{{ url_for('user.place_order') }}" class="btn btn-outline-success mt-auto">Place Order</a>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card p-3 h-100 {% if user_.darkMode == 1 %}bg-dark text-white border-secondary{% endif %}">
+                <h5>Portfolio Holdings</h5>
+                <p>Track your real-time P&amp;L across stocks and mutual funds.</p>
+                <a href="{{ url_for('user.holdings') }}" class="btn btn-outline-info mt-auto">View Holdings</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

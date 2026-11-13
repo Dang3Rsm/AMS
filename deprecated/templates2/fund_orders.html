@@ -1,0 +1,39 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+fund orders
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>Fund Orders Table</h1>
+</header>
+
+<section id="fund_orders_table">
+    <h2>Fund Orders</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Fund ID</th>
+                <th>Order Type</th>
+                <th>Amount</th>
+                <th>Order Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Fund Order Data Example -->
+            <tr>
+                <td>3001</td>
+                <td>1</td>
+                <td>Investment</td>
+                <td>$10,000</td>
+                <td>2024-09-15</td>
+            </tr>
+            <!-- Add more fund orders as needed -->
+        </tbody>
+    </table>
+</section>
+
+
+{% endblock %}

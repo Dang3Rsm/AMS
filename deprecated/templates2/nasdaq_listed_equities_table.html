@@ -1,0 +1,36 @@
+{% extends "indexlayout.html" %}
+{% block title %}
+NASDAQ listed equities table
+{% endblock %}
+
+{% block body %}
+
+<header>
+    <h1>NASDAQ Listed Equities Table</h1>
+</header>
+
+<section id="nasdaq_listed_equities_table">
+    <h2>NASDAQ Listed Equities</h2>
+    <table border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Ticker Symbol</th>
+                <th>Company Name</th>
+                <th>Sector</th>
+                <th>Industry</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Equity Data Example -->
+            <tr>
+                <td>AAPL</td>
+                <td>Apple Inc.</td>
+                <td>Technology</td>
+                <td>Consumer Electronics</td>
+            </tr>
+            <!-- Add more equities as needed -->
+        </tbody>
+    </table>
+</section>
+
+{% endblock %}
